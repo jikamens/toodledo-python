@@ -3,7 +3,7 @@
 from marshmallow import fields, post_load, Schema
 from marshmallow.validate import Length
 
-from .custom_fields import _ToodledoBoolean, _ToodledoDate, _ToodledoDatetime, _ToodledoDueDateModifier, _ToodledoListId, _ToodledoPriority, _ToodledoStatus, _ToodledoTags
+from .custom_fields import _ToodledoBoolean, _ToodledoDate, _ToodledoDatetime, _ToodledoDueDateModifier, _ToodledoListId, _ToodledoPriority, _ToodledoStatus, _ToodledoTags, _ToodledoInteger
 
 class Task:
 	"""Represents a single task"""
@@ -35,7 +35,7 @@ class _TaskSchema(Schema):
 	length = fields.Integer()
 	note = fields.String()
 	repeat = fields.String()
-	parent = fields.Integer()
+	parent = _ToodledoInteger()
 	folderId = _ToodledoListId(dump_to="folder", load_from="folder")
 	contextId = _ToodledoListId(dump_to="context", load_from="context")
 

@@ -111,3 +111,15 @@ class _ToodledoStatus(fields.Field):
 				return enumValue
 		assert False, "Bad incoming integer for status enum"
 		return None
+
+class _ToodledoInteger(fields.Integer):
+        def _serialize(self, value, attr, obj):
+                if value is None:
+                        return 0
+                return super(_ToodledoInteger, self)._serialize(
+                        value, attr, obj)
+
+        def _deserialize(self, value, attr, data):
+                if value == 0:
+                        return None
+                return value
