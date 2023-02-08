@@ -12,9 +12,11 @@ class _Account: # pylint: disable=too-few-public-methods
 		return "<_Account lastEditTask={}, lastDeleteTask={}>".format(self.lastEditTask, self.lastDeleteTask)
 
 class _AccountSchema(Schema):
-	lastEditTask = _ToodledoDatetime(dump_to="lastedit_task", load_from="lastedit_task")
-	lastDeleteTask = _ToodledoDatetime(dump_to="lastdelete_task", load_from="lastdelete_task")
+	lastEditTask = _ToodledoDatetime(data_key="lastedit_task")
+	lastDeleteTask = _ToodledoDatetime(data_key="lastdelete_task")
 
 	@post_load
-	def _MakeAccount(self, data): # pylint: disable=no-self-use
+	def _MakeAccount(self, data, many=False, partial=True): # pylint: disable=no-self-use
+		# I don't know how to handle many yet
+		assert not many
 		return _Account(data["lastEditTask"], data["lastDeleteTask"])

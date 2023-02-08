@@ -65,7 +65,7 @@ class Toodledo:
 		folders = self._Session().get(Toodledo.getFoldersUrl)
 		folders.raise_for_status()
 		schema = _FolderSchema()
-		return [schema.load(x).data for x in folders.json()]
+		return [schema.load(x) for x in folders.json()]
 
 	def AddFolder(self, folder):
 		"""Add folder, return the created folder"""
@@ -74,7 +74,7 @@ class Toodledo:
 		if "errorCode" in response.json():
 			error("Toodledo error: {}".format(response.json()))
 			raise ToodledoError(response.json()["errorCode"])
-		return _FolderSchema().load(response.json()[0]).data
+		return _FolderSchema().load(response.json()[0])
 
 	def DeleteFolder(self, folder):
 		"""Delete folder"""
@@ -88,21 +88,21 @@ class Toodledo:
 
 	def EditFolder(self, folder):
 		"""Edits the given folder to have the given properties"""
-		folderData = _FolderSchema().dump(folder).data
+		folderData = _FolderSchema().dump(folder)
 		response = self._Session().post(Toodledo.editFolderUrl, params=folderData)
 		response.raise_for_status()
 		responseAsDict = response.json()
 		if "errorCode" in responseAsDict:
 			error("Toodledo error: {}".format(responseAsDict))
 			raise ToodledoError(responseAsDict["errorCode"])
-		return _FolderSchema().load(responseAsDict[0]).data
+		return _FolderSchema().load(responseAsDict[0])
 
 	def GetContexts(self):
 		"""Get all the contexts as context objects"""
 		contexts = self._Session().get(Toodledo.getContextsUrl)
 		contexts.raise_for_status()
 		schema = _ContextSchema()
-		return [schema.load(x).data for x in contexts.json()]
+		return [schema.load(x) for x in contexts.json()]
 
 	def AddContext(self, context):
 		"""Add context, return the created context"""
@@ -111,7 +111,7 @@ class Toodledo:
 		if "errorCode" in response.json():
 			error("Toodledo error: {}".format(response.json()))
 			raise ToodledoError(response.json()["errorCode"])
-		return _ContextSchema().load(response.json()[0]).data
+		return _ContextSchema().load(response.json()[0])
 
 	def DeleteContext(self, context):
 		"""Delete context"""
@@ -125,20 +125,20 @@ class Toodledo:
 
 	def EditContext(self, context):
 		"""Edits the given folder to have the given properties"""
-		contextData = _ContextSchema().dump(context).data
+		contextData = _ContextSchema().dump(context)
 		response = self._Session().post(Toodledo.editContextUrl, params=contextData)
 		response.raise_for_status()
 		responseAsDict = response.json()
 		if "errorCode" in responseAsDict:
 			error("Toodledo error: {}".format(responseAsDict))
 			raise ToodledoError(responseAsDict["errorCode"])
-		return _ContextSchema().load(responseAsDict[0]).data
+		return _ContextSchema().load(responseAsDict[0])
 
 	def GetAccount(self):
 		"""Get the Toodledo account"""
 		accountInfo = self._Session().get(Toodledo.getAccountUrl)
 		accountInfo.raise_for_status()
-		return _AccountSchema().load(accountInfo.json()).data
+		return _AccountSchema().load(accountInfo.json())
 
 	def GetTasks(self, params):
 		"""Get the tasks filtered by the given params"""
@@ -162,7 +162,7 @@ class Toodledo:
 				break
 			start += limit
 		schema = _TaskSchema()
-		return [schema.load(x).data for x in allTasks]
+		return [schema.load(x) for x in allTasks]
 
 	def EditTasks(self, taskList):
 		"""Change the existing tasks to be the same as the ones in the given list"""

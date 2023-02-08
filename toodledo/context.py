@@ -14,10 +14,12 @@ class Context: # pylint: disable=too-few-public-methods
 		return "<Context {}>".format(", ".join(attributes))
 
 class _ContextSchema(Schema):
-	id_ = fields.Integer(dump_to="id", load_from="id")
+	id_ = fields.Integer(data_key="id")
 	name = fields.String()
 	private = _ToodledoBoolean()
 
 	@post_load
-	def _MakeContext(self, data): # pylint: disable=no-self-use
+	def _MakeContext(self, data, many=False, partial=True): # pylint: disable=no-self-use
+		# I don't know how to handle many yet
+		assert not many
 		return Context(**data)

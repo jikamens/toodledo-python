@@ -14,12 +14,14 @@ class Folder: # pylint: disable=too-few-public-methods
 		return "<Folder {}>".format(", ".join(attributes))
 
 class _FolderSchema(Schema):
-	id_ = fields.Integer(dump_to="id", load_from="id")
+	id_ = fields.Integer(data_key="id")
 	name = fields.String()
 	private = _ToodledoBoolean()
 	archived = _ToodledoBoolean()
-	order = fields.Integer(dump_to="ord", load_from="ord")
+	order = fields.Integer(data_key="ord")
 
 	@post_load
-	def _MakeFolder(self, data): # pylint: disable=no-self-use
+	def _MakeFolder(self, data, many=False, partial=True): # pylint: disable=no-self-use
+		# I don't know how to handle many yet
+		assert not many
 		return Folder(**data)
