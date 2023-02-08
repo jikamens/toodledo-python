@@ -178,8 +178,17 @@ class Toodledo:
 			response.raise_for_status()
 			debug("Response: {},{}".format(response, response.text))
 			taskResponse = response.json()
-			if "errorCode" in taskResponse:
-				raise ToodledoError(taskResponse["errorCode"])
+			errors = []
+			if isinstance(taskResponse, list):
+				for response in taskResponse:
+					if "errorCode" in response:
+						errors.append(ToodledoError(response["errorCode"]))
+			elif "errorCode" in taskResponse:
+				errors.append(ToodledoError(taskResponse["errorCode"]))
+			if len(errors) == 1:
+				raise errors[0]
+			elif errors:
+				raise str(errors)
 			if len(taskList[start:start + limit]) < limit:
 				break
 			start += limit
