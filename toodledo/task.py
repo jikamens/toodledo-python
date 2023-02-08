@@ -26,6 +26,7 @@ class _TaskSchema(Schema):
 	tags = _ToodledoTags(dump_to="tag", load_from="tag")
 	startDate = _ToodledoDate(dump_to="startdate", load_from="startdate")
 	dueDate = _ToodledoDate(dump_to="duedate", load_from="duedate")
+	dueTime = _ToodledoDatetime(dump_to="duetime", load_from="duetime")
 	modified = _ToodledoDatetime()
 	completedDate = _ToodledoDate(dump_to="completed", load_from="completed")
 	star = _ToodledoBoolean()
@@ -38,6 +39,8 @@ class _TaskSchema(Schema):
 	parent = _ToodledoInteger()
 	folderId = _ToodledoListId(dump_to="folder", load_from="folder")
 	contextId = _ToodledoListId(dump_to="context", load_from="context")
+	meta = fields.String(allow_none=True)
+	reschedule = fields.Integer()
 
 	@post_load
 	def _MakeTask(self, data): # pylint: disable=no-self-use
