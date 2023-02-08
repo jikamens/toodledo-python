@@ -16,14 +16,14 @@ class AuthorizationNeeded(Exception):
 
 class ToodledoSession(OAuth2Session):
 	"""Refresh token when we get a 429 error"""
-	def request(self, method, url, data=None, headers=None, withhold_token=False, client_id=None, client_secret=None, **kwargs): # pylint: disable=too-many-arguments
-		response = super(ToodledoSession, self).request(method, url, headers=headers, data=data, **kwargs)
+	def request(self, *args, **kwargs): # pylint: disable=too-many-arguments
+		response = super(ToodledoSession, self).request(*args, **kwargs)
 		if response.status_code != 429:
 			return response
 		warning("Received 429 error - refreshing token and retrying")
 		token = self.refresh_token(Toodledo.tokenUrl, **self.auto_refresh_kwargs)
 		self.token_updater(token)
-		return super(ToodledoSession, self).request(method, url, headers=headers, data=data, **kwargs)
+		return super(ToodledoSession, self).request(*args, **kwargs)
 
 class Toodledo:
 	"""Wrapper for the Toodledo v3 API"""
