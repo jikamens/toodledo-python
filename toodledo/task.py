@@ -57,7 +57,7 @@ class _TaskSchema(Schema):
 
     # Pass through undocumented extra fields, e.g., "repeatfrom", that I
     # don't know what to do with.
-    class Meta:
+    class Meta:  # pylint: disable=too-few-public-methods
         unknown = INCLUDE
 
     @post_load

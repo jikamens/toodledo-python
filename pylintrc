@@ -5,4 +5,4 @@ max-line-length=79
 [MESSAGES CONTROL]
 disable=duplicate-code, fixme, invalid-name, len-as-condition,
   missing-function-docstring, missing-module-docstring,
-  missing-class-docstring, too-few-public-methods, unused-argument
+  missing-class-docstring, unused-argument
