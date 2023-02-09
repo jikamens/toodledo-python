@@ -2,6 +2,7 @@ from uuid import uuid4
 
 from toodledo import Folder
 
+
 # There's no export for these in the toodledo web interface so the user will
 # have to make them themselves
 def test_get_known_folders(toodledo):
@@ -21,6 +22,7 @@ def test_get_known_folders(toodledo):
     assert folders[2].name == "Test Folder - private"
     assert folders[2].archived is False
     assert folders[2].private is True
+
 
 def test_add_edit_delete_folder(toodledo):
     randomName = str(uuid4())

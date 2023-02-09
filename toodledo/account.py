@@ -3,7 +3,8 @@ from marshmallow import fields, post_load, Schema
 
 from .custom_fields import _ToodledoBoolean, _ToodledoDatetime
 
-class _Account: # pylint: disable=too-few-public-methods
+
+class _Account:  # pylint: disable=too-few-public-methods
     def __init__(self, lastEditTask, lastDeleteTask):
         self.lastEditTask = lastEditTask
         self.lastDeleteTask = lastDeleteTask
@@ -11,6 +12,7 @@ class _Account: # pylint: disable=too-few-public-methods
     def __repr__(self):
         return (f"<_Account lastEditTask={self.lastEditTask}, "
                 f"lastDeleteTask={self.lastDeleteTask}>")
+
 
 class _AccountSchema(Schema):
     userid = fields.String()

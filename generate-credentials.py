@@ -7,11 +7,13 @@ import os
 
 from toodledo import CommandLineAuthorization, TokenStorageFile
 
+
 def EscapeForBash(token):
     charactersToEscape = "{}\"[]: "
     for character in charactersToEscape:
         token = token.replace(character, "\\" + character)
     return token
+
 
 def main():
     tokenStorage = TokenStorageFile(os.environ["TOODLEDO_TOKEN_STORAGE"])
@@ -28,6 +30,7 @@ def main():
         copy(token)
         print("Escaped token copied to clipboard - update Travis "
               "TOODLEDO_TOKEN_READONLY environment variable")
+
 
 if __name__ == "__main__":
     main()

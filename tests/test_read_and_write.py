@@ -3,6 +3,7 @@ from uuid import uuid4
 
 from toodledo import DueDateModifier, Priority, Status, Task
 
+
 def CreateATask(toodledo, task):
     task.title = str(uuid4())
     toodledo.AddTasks([task])
@@ -44,13 +45,16 @@ def CreateATask(toodledo, task):
 
     return returnedTask
 
+
 def test_set_start_date(toodledo):
     task = CreateATask(toodledo, Task(startDate=date.today()))
     toodledo.DeleteTasks([task])
 
+
 def test_set_due_date(toodledo):
     task = CreateATask(toodledo, Task(dueDate=date.today()))
     toodledo.DeleteTasks([task])
+
 
 def test_set_tags(toodledo):
     task = CreateATask(toodledo, Task(tags=["a", "b", "c"]))
@@ -59,6 +63,7 @@ def test_set_tags(toodledo):
     task = CreateATask(toodledo, Task(tags=["z", "a", "b", "c"]))
     toodledo.DeleteTasks([task])
 
+
 def test_set_star(toodledo):
     task = CreateATask(toodledo, Task(star=True))
     toodledo.DeleteTasks([task])
@@ -66,10 +71,12 @@ def test_set_star(toodledo):
     task = CreateATask(toodledo, Task(star=False))
     toodledo.DeleteTasks([task])
 
+
 def test_existing_star(toodledo):
     tasks = toodledo.GetTasks(params={"fields": "star"})
     ourTask = [t for t in tasks if t.title == "Test task with star"][0]
     assert ourTask.star is True
+
 
 def test_set_status(toodledo):
     task = CreateATask(toodledo, Task(status=Status.NEXT_ACTION))
@@ -81,21 +88,26 @@ def test_set_status(toodledo):
     task = CreateATask(toodledo, Task(status=Status.WAITING))
     toodledo.DeleteTasks([task])
 
+
 def test_set_length(toodledo):
     task = CreateATask(toodledo, Task(length=42))
     toodledo.DeleteTasks([task])
+
 
 def test_set_note(toodledo):
     task = CreateATask(toodledo, Task(note="This is a note"))
     toodledo.DeleteTasks([task])
 
+
 def test_set_repeat(toodledo):
     task = CreateATask(toodledo, Task(repeat="FREQ=YEARLY"))
     toodledo.DeleteTasks([task])
 
+
 def test_set_parent(toodledo):
     task = CreateATask(toodledo, Task(parent=12345))
     toodledo.DeleteTasks([task])
+
 
 def test_set_priority(toodledo):
     task = CreateATask(toodledo, Task(priority=Priority.HIGH))
@@ -103,6 +115,7 @@ def test_set_priority(toodledo):
 
     task = CreateATask(toodledo, Task(priority=Priority.NEGATIVE))
     toodledo.DeleteTasks([task])
+
 
 def test_set_due_date_modifier(toodledo):
     task = CreateATask(
@@ -114,6 +127,7 @@ def test_set_due_date_modifier(toodledo):
         toodledo,
         Task(dueDate=date.today(), dueDateModifier=DueDateModifier.DUE_ON))
     toodledo.DeleteTasks([task])
+
 
 def test_write_then_read(toodledo):
     randomTitle = str(uuid4())
@@ -144,6 +158,7 @@ def test_write_then_read(toodledo):
     tasks = toodledo.GetTasks(params={})
     ourTasks = [t for t in tasks if t.title == randomTitle]
     assert len(ourTasks) == 0
+
 
 def test_extra_fields(toodledo):
     randomTitle = str(uuid4())

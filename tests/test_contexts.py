@@ -2,6 +2,7 @@ from uuid import uuid4
 
 from toodledo import Context
 
+
 # There's no export for these in the toodledo web interface so the user will
 # have to make them themselves
 def test_get_known_contexts(toodledo):
@@ -22,6 +23,7 @@ def test_get_known_contexts(toodledo):
     for wanted in wanted_contexts:
         context = next(c for c in contexts if c.name == wanted[0])
         assert context.private is wanted[1]
+
 
 def test_add_edit_delete_folder(toodledo):
     randomName = str(uuid4())

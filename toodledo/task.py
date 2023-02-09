@@ -15,6 +15,7 @@ from .custom_fields import (
     _ToodledoInteger,
 )
 
+
 class Task:
     """Represents a single task"""
 
@@ -29,7 +30,8 @@ class Task:
 
     def IsComplete(self):
         """Indicate whether this task is complete"""
-        return self.completedDate is not None # pylint: disable=no-member
+        return self.completedDate is not None  # pylint: disable=no-member
+
 
 class _TaskSchema(Schema):
     id_ = fields.Integer(data_key="id")
@@ -63,6 +65,7 @@ class _TaskSchema(Schema):
         # I don't know how to handle many yet
         assert not many
         return Task(**data)
+
 
 def _DumpTaskList(taskList):
     # TODO - pass many=True to the schema instead of this custom stuff

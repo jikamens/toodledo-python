@@ -3,7 +3,8 @@ from marshmallow import fields, post_load, Schema
 
 from .custom_fields import _ToodledoBoolean
 
-class Context: # pylint: disable=too-few-public-methods
+
+class Context:  # pylint: disable=too-few-public-methods
     """Toodledo context"""
     def __init__(self, **data):
         for name, item in data.items():
@@ -13,6 +14,7 @@ class Context: # pylint: disable=too-few-public-methods
         attributes = sorted([f"{name}={item}"
                              for name, item in self.__dict__.items()])
         return f"<Context {', '.join(attributes)}>"
+
 
 class _ContextSchema(Schema):
     id_ = fields.Integer(data_key="id")

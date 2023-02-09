@@ -1,9 +1,11 @@
 def test_get_account(toodledo):
     _ = toodledo.GetAccount()
 
+
 def test_get_tasks(toodledo):
     tasks = toodledo.GetTasks(params={})
     assert isinstance(tasks, list)
+
 
 def test_get_tasks_with_known_folders(toodledo):
     folders = toodledo.GetFolders()
@@ -18,6 +20,7 @@ def test_get_tasks_with_known_folders(toodledo):
 
     assert taskWithPrivateFolder.folderId == privateFolderId
     assert taskWithPublicFolder.folderId == publicFolderId
+
 
 def test_get_tasks_with_known_contexts(toodledo):
     contexts = toodledo.GetContexts()

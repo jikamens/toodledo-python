@@ -9,6 +9,7 @@ from .types import DueDateModifier, Priority, Status
 # all the fields have the option for not being set
 # dates have an extra option of being 0 or a real date
 
+
 # states for this field are:
 # a GMT timestamp with the time set to noon
 # unset, represented by API as 0
@@ -24,6 +25,7 @@ class _ToodledoDate(fields.Field):
             return None
         return datetime.utcfromtimestamp(float(value)).date()
 
+
 # states for this field are:
 # a GMT timestamp
 # unset, represented by API as 0
@@ -38,6 +40,7 @@ class _ToodledoDatetime(fields.Field):
             return None
         return datetime.utcfromtimestamp(float(value))
 
+
 class _ToodledoTags(fields.Field):
     def _serialize(self, value, attr, obj, **kwargs):
         assert isinstance(value, list)
@@ -48,6 +51,7 @@ class _ToodledoTags(fields.Field):
         if value == "":
             return []
         return [x.strip() for x in value.split(",")]
+
 
 # Can't use the standard marshmallow boolean because it serializes to
 # True/False rather than 1/0
@@ -61,6 +65,7 @@ class _ToodledoBoolean(fields.Field):
         assert 0 <= value <= 1
         return value == 1
 
+
 class _ToodledoListId(fields.Field):
     def _serialize(self, value, attr, obj, **kwargs):
         assert value is None or isinstance(value, int)
@@ -71,6 +76,7 @@ class _ToodledoListId(fields.Field):
         if value == 0:
             return None
         return value
+
 
 class _ToodledoPriority(fields.Field):
     def _serialize(self, value, attr, obj, **kwargs):
@@ -86,6 +92,7 @@ class _ToodledoPriority(fields.Field):
         assert False, "Bad incoming integer for priority enum"
         return None
 
+
 class _ToodledoDueDateModifier(fields.Field):
     def _serialize(self, value, attr, obj, **kwargs):
         assert isinstance(value, DueDateModifier)
@@ -100,6 +107,7 @@ class _ToodledoDueDateModifier(fields.Field):
         assert False, "Bad incoming integer for due date modifier enum"
         return None
 
+
 class _ToodledoStatus(fields.Field):
     def _serialize(self, value, attr, obj, **kwargs):
         assert isinstance(value, Status)
@@ -113,6 +121,7 @@ class _ToodledoStatus(fields.Field):
                 return enumValue
         assert False, "Bad incoming integer for status enum"
         return None
+
 
 class _ToodledoInteger(fields.Integer):
     def _serialize(self, value, attr, obj, **kwargs):

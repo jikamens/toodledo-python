@@ -2,6 +2,7 @@
 
 from enum import Enum
 
+
 class Priority(Enum):
     """Priority as an enum with the correct Toodledo integer equivalents"""
     NEGATIVE = -1
@@ -10,12 +11,14 @@ class Priority(Enum):
     HIGH = 2
     TOP = 3
 
+
 class DueDateModifier(Enum):
     """Enum for all the due date modifiers"""
     DUE_BY = 0
     DUE_ON = 1
     DUE_AFTER = 2
     OPTIONALLY = 3
+
 
 class Status(Enum):
     """Enum for all the possible statuses"""

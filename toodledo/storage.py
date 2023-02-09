@@ -2,6 +2,7 @@
 
 from json import dump, load
 
+
 class TokenStorageFile:
     """Stores the API tokens as a file"""
 

@@ -11,8 +11,10 @@ from .errors import ToodledoError
 from .folder import _FolderSchema
 from .task import _DumpTaskList, _TaskSchema
 
+
 class AuthorizationNeeded(Exception):
     """Thrown when the token storage doesn't contain a token"""
+
 
 class ToodledoSession(OAuth2Session):
     """Refresh token when we get a 429 error"""
@@ -20,7 +22,7 @@ class ToodledoSession(OAuth2Session):
         self.refreshing = False
         super().__init__(*args, **kwargs)
 
-    def request(self, *args, **kwargs): # pylint: disable=too-many-arguments
+    def request(self, *args, **kwargs):  # pylint: disable=too-many-arguments
         response = super().request(*args, **kwargs)
         if response.status_code != 429:
             self.refreshing = False
@@ -33,6 +35,7 @@ class ToodledoSession(OAuth2Session):
             Toodledo.tokenUrl, **self.auto_refresh_kwargs)
         self.token_updater(token)
         return super().request(*args, **kwargs)
+
 
 class Toodledo:
     """Wrapper for the Toodledo v3 API"""
@@ -170,7 +173,7 @@ class Toodledo:
     def GetTasks(self, params):
         """Get the tasks filtered by the given params"""
         allTasks = []
-        limit = 1000 # single request limit
+        limit = 1000  # single request limit
         start = 0
         while True:
             debug(f"Start: {start}")
@@ -197,7 +200,7 @@ class Toodledo:
         if len(taskList) == 0:
             return
         debug(f"Total tasks to edit: {len(taskList)}")
-        limit = 50 # single request limit
+        limit = 50  # single request limit
         start = 0
         while True:
             debug(f"Start: {start}")
@@ -228,7 +231,7 @@ class Toodledo:
         """Add the given tasks"""
         if len(taskList) == 0:
             return
-        limit = 50 # single request limit
+        limit = 50  # single request limit
         start = 0
         while True:
             debug(f"Start: {start}")
@@ -247,7 +250,7 @@ class Toodledo:
         if len(taskList) == 0:
             return
         taskIdList = [task.id_ for task in taskList]
-        limit = 50 # single request limit
+        limit = 50  # single request limit
         start = 0
         while True:
             debug(f"Start: {start}")

@@ -5,6 +5,7 @@ from pytest import fixture
 
 from toodledo import TokenStorageFile, Toodledo
 
+
 class TokenReadOnly:
     """Read the API tokens from an environment variable"""
 
@@ -20,6 +21,7 @@ class TokenReadOnly:
     def Load(self):
         """Load and return the token. Called by Toodledo class"""
         return loads(environ[self.name])
+
 
 @fixture
 def toodledo():

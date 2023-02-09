@@ -1,5 +1,6 @@
 """Known Toodledo errors"""
 
+
 class ToodledoError(Exception):
     """Custom error for wrapping API error codes"""
     errorCodeToMessage = {

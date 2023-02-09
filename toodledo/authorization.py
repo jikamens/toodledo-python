@@ -2,6 +2,7 @@
 from requests_oauthlib import OAuth2Session
 from .transport import Toodledo
 
+
 def CommandLineAuthorization(clientId, clientSecret, scope, tokenStorage):
     """Authorize in a command line program"""
     authorizationBaseUrl = "https://api.toodledo.com/3/account/authorize.php"
