@@ -3,4 +3,6 @@ indent-string="    "
 max-line-length=200
 
 [MESSAGES CONTROL]
-disable=bad-continuation, duplicate-code, fixme, invalid-name, len-as-condition
+disable=duplicate-code, fixme, invalid-name, len-as-condition,
+  missing-function-docstring, missing-module-docstring,
+  missing-class-docstring, too-few-public-methods, unused-argument

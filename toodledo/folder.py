@@ -10,8 +10,8 @@ class Folder: # pylint: disable=too-few-public-methods
             setattr(self, name, item)
 
     def __repr__(self):
-        attributes = sorted(["{}={}".format(name, item) for name, item in self.__dict__.items()])
-        return "<Folder {}>".format(", ".join(attributes))
+        attributes = sorted([f"{name}={item}" for name, item in self.__dict__.items()])
+        return f"<Folder {', '.join(attributes)}>"
 
 class _FolderSchema(Schema):
     id_ = fields.Integer(data_key="id")
@@ -21,7 +21,7 @@ class _FolderSchema(Schema):
     order = fields.Integer(data_key="ord")
 
     @post_load
-    def _MakeFolder(self, data, many=False, partial=True): # pylint: disable=no-self-use
+    def _MakeFolder(self, data, many=False, partial=True):
         # I don't know how to handle many yet
         assert not many
         return Folder(**data)

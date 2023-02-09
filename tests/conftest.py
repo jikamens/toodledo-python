@@ -12,7 +12,7 @@ class TokenReadOnly:
         self.name = name
         self.token = self.Load()
 
-    def Save(self, token): # pylint: disable=no-self-use
+    def Save(self, token):
         """Do nothing - this may cause a problem if the refresh token changes"""
         self.token = token
 

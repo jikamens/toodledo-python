@@ -10,13 +10,13 @@ class TokenStorageFile:
 
     def Save(self, token):
         """Save the given token. Called by Toodledo class"""
-        with open(self.path, "w") as f:
+        with open(self.path, "w", encoding="ascii") as f:
             dump(token, f)
 
     def Load(self):
         """Load and return the token. Called by Toodledo class"""
         try:
-            with open(self.path, "r") as f:
+            with open(self.path, "r", encoding="ascii") as f:
                 return load(f)
         except FileNotFoundError:
             return None

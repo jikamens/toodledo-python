@@ -9,7 +9,7 @@ class _Account: # pylint: disable=too-few-public-methods
         self.lastDeleteTask = lastDeleteTask
 
     def __repr__(self):
-        return "<_Account lastEditTask={}, lastDeleteTask={}>".format(self.lastEditTask, self.lastDeleteTask)
+        return f"<_Account lastEditTask={self.lastEditTask}, lastDeleteTask={self.lastDeleteTask}>"
 
 class _AccountSchema(Schema):
     userid = fields.String()
@@ -36,7 +36,7 @@ class _AccountSchema(Schema):
     lastEditOutline = _ToodledoDatetime(data_key="lastedit_outline")
 
     @post_load
-    def _MakeAccount(self, data, many=False, partial=True): # pylint: disable=no-self-use
+    def _MakeAccount(self, data, many=False, partial=True):
         # I don't know how to handle many yet
         assert not many
         return _Account(data["lastEditTask"], data["lastDeleteTask"])

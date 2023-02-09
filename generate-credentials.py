@@ -3,9 +3,9 @@
 """Generate credentials for tests and updating Travis"""
 
 from contextlib import suppress
-from os import environ
+import os
 
-from toodledo import CommandLineAuthorization, TokenStorageFile, Toodledo
+from toodledo import CommandLineAuthorization, TokenStorageFile
 
 def EscapeForBash(token):
     charactersToEscape = "{}\"[]: "
@@ -13,18 +13,18 @@ def EscapeForBash(token):
         token = token.replace(character, "\\" + character)
     return token
 
-if __name__ == "__main__":
+def main():
+    tokenStorage = TokenStorageFile(os.environ["TOODLEDO_TOKEN_STORAGE"])
 
-    tokenStorage = TokenStorageFile(environ["TOODLEDO_TOKEN_STORAGE"])
-
-    app = Toodledo(clientId=environ["TOODLEDO_CLIENT_ID"], clientSecret=environ["TOODLEDO_CLIENT_SECRET"], tokenStorage=tokenStorage, scope="basic tasks notes folders write")
-
-    CommandLineAuthorization(environ["TOODLEDO_CLIENT_ID"], environ["TOODLEDO_CLIENT_SECRET"], "basic tasks notes folders write", tokenStorage)
+    CommandLineAuthorization(os.environ["TOODLEDO_CLIENT_ID"], os.environ["TOODLEDO_CLIENT_SECRET"], "basic tasks notes folders write", tokenStorage)
 
     with suppress(ImportError):
-        from pyperclip import copy
-        with open(environ["TOODLEDO_TOKEN_STORAGE"]) as f:
+        from pyperclip import copy  # pylint: disable=import-outside-toplevel
+        with open(os.environ["TOODLEDO_TOKEN_STORAGE"], encoding="ascii") as f:
             token = f.read()
         token = EscapeForBash(token)
         copy(token)
         print("Escaped token copied to clipboard - update Travis TOODLEDO_TOKEN_READONLY environment variable")
+
+if __name__ == "__main__":
+    main()

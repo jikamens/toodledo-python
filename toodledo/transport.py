@@ -18,10 +18,10 @@ class ToodledoSession(OAuth2Session):
     """Refresh token when we get a 429 error"""
     def __init__(self, *args, **kwargs):
         self.refreshing = False
-        return super(ToodledoSession, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def request(self, *args, **kwargs): # pylint: disable=too-many-arguments
-        response = super(ToodledoSession, self).request(*args, **kwargs)
+        response = super().request(*args, **kwargs)
         if response.status_code != 429:
             self.refreshing = False
             return response
@@ -31,7 +31,7 @@ class ToodledoSession(OAuth2Session):
         warning("Received 429 error - refreshing token and retrying")
         token = self.refresh_token(Toodledo.tokenUrl, **self.auto_refresh_kwargs)
         self.token_updater(token)
-        return super(ToodledoSession, self).request(*args, **kwargs)
+        return super().request(*args, **kwargs)
 
 class Toodledo:
     """Wrapper for the Toodledo v3 API"""
@@ -80,7 +80,7 @@ class Toodledo:
         response = self._Session().post(Toodledo.addFolderUrl, params={"name": folder.name, "private": 1 if folder.private else 0})
         response.raise_for_status()
         if "errorCode" in response.json():
-            error("Toodledo error: {}".format(response.json()))
+            error(f"Toodledo error: {response.json()}")
             raise ToodledoError(response.json()["errorCode"])
         return _FolderSchema().load(response.json()[0])
 
@@ -90,7 +90,7 @@ class Toodledo:
         response.raise_for_status()
         jsonResponse = response.json()
         if "errorCode" in jsonResponse:
-            error("Toodledo error: {}".format(jsonResponse))
+            error(f"Toodledo error: {jsonResponse}")
             raise ToodledoError(jsonResponse["errorCode"])
         assert jsonResponse == {"deleted": folder.id_}, dumps(jsonResponse)
 
@@ -101,7 +101,7 @@ class Toodledo:
         response.raise_for_status()
         responseAsDict = response.json()
         if "errorCode" in responseAsDict:
-            error("Toodledo error: {}".format(responseAsDict))
+            error(f"Toodledo error: {responseAsDict}")
             raise ToodledoError(responseAsDict["errorCode"])
         return _FolderSchema().load(responseAsDict[0])
 
@@ -117,7 +117,7 @@ class Toodledo:
         response = self._Session().post(Toodledo.addContextUrl, params={"name": context.name, "private": 1 if context.private else 0})
         response.raise_for_status()
         if "errorCode" in response.json():
-            error("Toodledo error: {}".format(response.json()))
+            error(f"Toodledo error: {response.json()}")
             raise ToodledoError(response.json()["errorCode"])
         return _ContextSchema().load(response.json()[0])
 
@@ -127,7 +127,7 @@ class Toodledo:
         response.raise_for_status()
         jsonResponse = response.json()
         if "errorCode" in jsonResponse:
-            error("Toodledo error: {}".format(jsonResponse))
+            error(f"Toodledo error: {jsonResponse}")
             raise ToodledoError(jsonResponse["errorCode"])
         assert jsonResponse == {"deleted": context.id_}, dumps(jsonResponse)
 
@@ -138,7 +138,7 @@ class Toodledo:
         response.raise_for_status()
         responseAsDict = response.json()
         if "errorCode" in responseAsDict:
-            error("Toodledo error: {}".format(responseAsDict))
+            error(f"Toodledo error: {responseAsDict}")
             raise ToodledoError(responseAsDict["errorCode"])
         return _ContextSchema().load(responseAsDict[0])
 
@@ -154,18 +154,18 @@ class Toodledo:
         limit = 1000 # single request limit
         start = 0
         while True:
-            debug("Start: {}".format(start))
+            debug(f"Start: {start}")
             params["start"] = start
             params["num"] = limit
             response = self._Session().get(Toodledo.getTasksUrl, params=params)
             response.raise_for_status()
             tasks = response.json()
             if "errorCode" in tasks:
-                error("Toodledo error: {}".format(tasks))
+                error(f"Toodledo error: {tasks}")
                 raise ToodledoError(tasks["errorCode"])
             # the first field contains the count or the error code
             allTasks.extend(tasks[1:])
-            debug("Retrieved {:,} tasks".format(len(tasks[1:])))
+            debug(f"Retrieved {len(tasks[1:]):,} tasks")
             if len(tasks[1:]) < limit:
                 break
             start += limit
@@ -176,15 +176,15 @@ class Toodledo:
         """Change the existing tasks to be the same as the ones in the given list"""
         if len(taskList) == 0:
             return
-        debug("Total tasks to edit: {}".format(len(taskList)))
+        debug(f"Total tasks to edit: {len(taskList)}")
         limit = 50 # single request limit
         start = 0
         while True:
-            debug("Start: {}".format(start))
+            debug(f"Start: {start}")
             listDump = _DumpTaskList(taskList[start:start + limit])
             response = self._Session().post(Toodledo.editTasksUrl, params={"tasks": dumps(listDump)})
             response.raise_for_status()
-            debug("Response: {},{}".format(response, response.text))
+            debug(f"Response: {response},{response.text}")
             taskResponse = response.json()
             errors = []
             if isinstance(taskResponse, list):
@@ -195,8 +195,10 @@ class Toodledo:
                 errors.append(ToodledoError(taskResponse["errorCode"]))
             if len(errors) == 1:
                 raise errors[0]
-            elif errors:
-                raise str(errors)
+            if errors:
+                # pylint: disable=broad-exception-raised
+                raise Exception(str(errors))
+                # pylint: enable=broad-exception-raised
             if len(taskList[start:start + limit]) < limit:
                 break
             start += limit
@@ -208,7 +210,7 @@ class Toodledo:
         limit = 50 # single request limit
         start = 0
         while True:
-            debug("Start: {}".format(start))
+            debug(f"Start: {start}")
             listDump = _DumpTaskList(taskList[start:start + limit])
             response = self._Session().post(Toodledo.addTasksUrl, params={"tasks": dumps(listDump)})
             response.raise_for_status()
@@ -226,7 +228,7 @@ class Toodledo:
         limit = 50 # single request limit
         start = 0
         while True:
-            debug("Start: {}".format(start))
+            debug(f"Start: {start}")
             response = self._Session().post(Toodledo.deleteTasksUrl, params={"tasks": dumps(taskIdList[start:start + limit])})
             response.raise_for_status()
             if "errorCode" in response.json():

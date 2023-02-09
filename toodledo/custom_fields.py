@@ -1,6 +1,6 @@
 """Implementation"""
 
-from datetime import date, datetime, timezone
+from datetime import datetime, timezone
 
 from marshmallow import fields
 
@@ -13,12 +13,12 @@ from .types import DueDateModifier, Priority, Status
 # a GMT timestamp with the time set to noon
 # unset, represented by API as 0
 class _ToodledoDate(fields.Field):
-    def _serialize(self, value, attr, obj):
+    def _serialize(self, value, attr, obj, **kwargs):
         if value is None:
             return 0
         return datetime(year=value.year, month=value.month, day=value.day, hour=12, minute=0, tzinfo=timezone.utc).timestamp()
 
-    def _deserialize(self, value, attr, data, partial=True):
+    def _deserialize(self, value, attr, data, partial=True, **kwargs):
         if value == 0:
             return None
         return datetime.utcfromtimestamp(float(value)).date()
@@ -27,22 +27,22 @@ class _ToodledoDate(fields.Field):
 # a GMT timestamp
 # unset, represented by API as 0
 class _ToodledoDatetime(fields.Field):
-    def _serialize(self, value, attr, obj):
+    def _serialize(self, value, attr, obj, **kwargs):
         if value is None:
             return 0
         return value.replace(tzinfo=timezone.utc).timestamp()
 
-    def _deserialize(self, value, attr, data, partial=True):
+    def _deserialize(self, value, attr, data, partial=True, **kwargs):
         if value == 0:
             return None
         return datetime.utcfromtimestamp(float(value))
 
 class _ToodledoTags(fields.Field):
-    def _serialize(self, value, attr, obj):
+    def _serialize(self, value, attr, obj, **kwargs):
         assert isinstance(value, list)
         return ", ".join(sorted(value))
 
-    def _deserialize(self, value, attr, data, partial=True):
+    def _deserialize(self, value, attr, data, partial=True, **kwargs):
         assert isinstance(value, str)
         if value == "":
             return []
@@ -50,32 +50,32 @@ class _ToodledoTags(fields.Field):
 
 # Can't use the standard marshmallow boolean because it serializes to True/False rather than 1/0
 class _ToodledoBoolean(fields.Field):
-    def _serialize(self, value, attr, obj):
+    def _serialize(self, value, attr, obj, **kwargs):
         assert isinstance(value, bool)
         return 1 if value else 0
 
-    def _deserialize(self, value, attr, data, partial=True):
+    def _deserialize(self, value, attr, data, partial=True, **kwargs):
         assert isinstance(value, int)
         assert 0 <= value <= 1
         return value == 1
 
 class _ToodledoListId(fields.Field):
-    def _serialize(self, value, attr, obj):
+    def _serialize(self, value, attr, obj, **kwargs):
         assert value is None or isinstance(value, int)
         return value if value is not None else 0
 
-    def _deserialize(self, value, attr, data, partial=True):
+    def _deserialize(self, value, attr, data, partial=True, **kwargs):
         assert isinstance(value, int)
         if value == 0:
             return None
         return value
 
 class _ToodledoPriority(fields.Field):
-    def _serialize(self, value, attr, obj):
+    def _serialize(self, value, attr, obj, **kwargs):
         assert isinstance(value, Priority)
         return value.value
 
-    def _deserialize(self, value, attr, data, partial=True):
+    def _deserialize(self, value, attr, data, partial=True, **kwargs):
         assert isinstance(value, int)
         assert -1 <= value <= 3
         for enumValue in Priority:
@@ -85,11 +85,11 @@ class _ToodledoPriority(fields.Field):
         return None
 
 class _ToodledoDueDateModifier(fields.Field):
-    def _serialize(self, value, attr, obj):
+    def _serialize(self, value, attr, obj, **kwargs):
         assert isinstance(value, DueDateModifier)
         return value.value
 
-    def _deserialize(self, value, attr, data, partial=True):
+    def _deserialize(self, value, attr, data, partial=True, **kwargs):
         assert isinstance(value, int)
         assert 0 <= value <= 3
         for enumValue in DueDateModifier:
@@ -99,11 +99,11 @@ class _ToodledoDueDateModifier(fields.Field):
         return None
 
 class _ToodledoStatus(fields.Field):
-    def _serialize(self, value, attr, obj):
+    def _serialize(self, value, attr, obj, **kwargs):
         assert isinstance(value, Status)
         return value.value
 
-    def _deserialize(self, value, attr, data, partial=True):
+    def _deserialize(self, value, attr, data, partial=True, **kwargs):
         assert isinstance(value, int)
         assert 0 <= value <= 10
         for enumValue in Status:
@@ -113,13 +113,12 @@ class _ToodledoStatus(fields.Field):
         return None
 
 class _ToodledoInteger(fields.Integer):
-    def _serialize(self, value, attr, obj):
+    def _serialize(self, value, attr, obj, **kwargs):
         if value is None:
             return 0
-        return super(_ToodledoInteger, self)._serialize(
-                value, attr, obj)
+        return super()._serialize(value, attr, obj)
 
-    def _deserialize(self, value, attr, data, partial=True):
+    def _deserialize(self, value, attr, data, partial=True, **kwargs):
         if value == 0:
             return None
         return value

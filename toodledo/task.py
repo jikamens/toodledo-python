@@ -13,8 +13,8 @@ class Task:
             setattr(self, name, item)
 
     def __repr__(self):
-        attributes = sorted(["{}={}".format(name, item) for name, item in self.__dict__.items()])
-        return "<Task {}>".format(", ".join(attributes))
+        attributes = sorted([f"{name}={item}" for name, item in self.__dict__.items()])
+        return f"<Task {', '.join(attributes)}>"
 
     def IsComplete(self):
         """Indicate whether this task is complete"""
@@ -48,7 +48,7 @@ class _TaskSchema(Schema):
         unknown = INCLUDE
 
     @post_load
-    def _MakeTask(self, data, many=False, partial=True): # pylint: disable=no-self-use
+    def _MakeTask(self, data, many=False, partial=True):
         # I don't know how to handle many yet
         assert not many
         return Task(**data)

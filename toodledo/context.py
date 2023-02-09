@@ -10,8 +10,8 @@ class Context: # pylint: disable=too-few-public-methods
             setattr(self, name, item)
 
     def __repr__(self):
-        attributes = sorted(["{}={}".format(name, item) for name, item in self.__dict__.items()])
-        return "<Context {}>".format(", ".join(attributes))
+        attributes = sorted([f"{name}={item}" for name, item in self.__dict__.items()])
+        return f"<Context {', '.join(attributes)}>"
 
 class _ContextSchema(Schema):
     id_ = fields.Integer(data_key="id")
@@ -19,7 +19,7 @@ class _ContextSchema(Schema):
     private = _ToodledoBoolean()
 
     @post_load
-    def _MakeContext(self, data, many=False, partial=True): # pylint: disable=no-self-use
+    def _MakeContext(self, data, many=False, partial=True):
         # I don't know how to handle many yet
         assert not many
         return Context(**data)

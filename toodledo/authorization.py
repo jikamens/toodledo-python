@@ -10,7 +10,7 @@ def CommandLineAuthorization(clientId, clientSecret, scope, tokenStorage):
     print("Go to the following URL and authorize the app:" + authorizationUrl)
 
     try:
-        from pyperclip import copy
+        from pyperclip import copy  # pylint: disable=import-outside-toplevel
         copy(authorizationUrl)
         print("URL copied to clipboard")
     except ImportError:
