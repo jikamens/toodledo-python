@@ -1,6 +1,6 @@
 """Task-related stuff"""
 
-from marshmallow import fields, post_load, Schema, INCLUDE
+from marshmallow import fields, post_load, Schema
 from marshmallow.validate import Length
 
 from .custom_fields import (
@@ -54,11 +54,10 @@ class _TaskSchema(Schema):
     contextId = _ToodledoListId(data_key="context")
     meta = fields.String(allow_none=True)
     reschedule = fields.Integer()
-
-    # Pass through undocumented extra fields, e.g., "repeatfrom", that I
-    # don't know what to do with.
-    class Meta:  # pylint: disable=too-few-public-methods
-        unknown = INCLUDE
+    # Note: This is an internal field that the API isn't supposed to be
+    # returning. You should ignore it. It's included here only to maintain
+    # schema validation.
+    repeatfrom = fields.Integer(allow_none=True)
 
     @post_load
     def _MakeTask(self, data, many=False, partial=True):
