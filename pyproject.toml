@@ -28,6 +28,7 @@ requests = "^2.20"
 pylint = "^2.16"
 pytest = "^3.9"
 pyperclip = "^1.7"
+flake8 = "^4.0"
 
 [build-system]
 requires = ["poetry-core"]
