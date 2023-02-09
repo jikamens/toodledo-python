@@ -6,7 +6,7 @@ authors = ["Jonathan Kamens <jik@kamens.us>",
            "Rehan Khwaja <rehan@khwaja.name>"]
 license = "MIT"
 readme = "README.rst"
-homepage = "https://github.com/rkhwaja/toodledo-python"
+homepage = "https://github.com/jikamens/toodledo-python"
 classifiers = [
 	"Development Status :: 5 - Production/Stable",
 	"License :: OSI Approved :: MIT License",
