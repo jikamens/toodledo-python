@@ -5,14 +5,22 @@ from toodledo import Context
 # There's no export for these in the toodledo web interface so the user will have to make them themselves
 def test_get_known_contexts(toodledo):
 	contexts = toodledo.GetContexts()
+	changed = False
+	wanted_contexts = (("Test Context - private", True),
+			   ("Test Context - public", False))
+	for wanted in wanted_contexts:
+		if not any(True for c in contexts if c.name == wanted[0]):
+			toodledo.AddContext(Context(name=wanted[0], private=wanted[1]))
+			changed = True
+	if changed:
+		contexts = toodledo.GetContexts()
+
 	assert isinstance(contexts, list)
-	assert len(contexts) == 2
+	assert len(contexts) >= 2
 
-	assert contexts[0].name == "Test Context - private"
-	assert contexts[0].private is True
-
-	assert contexts[1].name == "Test Context - public"
-	assert contexts[1].private is False
+	for wanted in wanted_contexts:
+		context = next(c for c in contexts if c.name == wanted[0])
+		assert context.private is wanted[1]
 
 def test_add_edit_delete_folder(toodledo):
 	randomName = str(uuid4())
