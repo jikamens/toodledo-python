@@ -4,8 +4,8 @@ from uuid import uuid4
 from toodledo import DueDateModifier, Priority, Status, Task
 
 
-def CreateATask(toodledo, task):
-    task.title = str(uuid4())
+def CreateATask(toodledo, task, title=None):
+    task.title = str(uuid4()) if title is None else title
     toodledo.AddTasks([task])
     tasks = toodledo.GetTasks(
             params={"fields": "startdate,duedate,tag,star,priority,duedatemod,"
@@ -73,8 +73,15 @@ def test_set_star(toodledo):
 
 
 def test_existing_star(toodledo):
+    title = "Test task with star"
     tasks = toodledo.GetTasks(params={"fields": "star"})
-    ourTask = [t for t in tasks if t.title == "Test task with star"][0]
+    try:
+        ourTask = next(t for t in tasks if t.title == title)
+    except StopIteration:
+        CreateATask(toodledo, Task(star=True), title=title)
+        tasks = toodledo.GetTasks(params={"fields": "star"})
+        ourTask = next(t for t in tasks if t.title == title)
+
     assert ourTask.star is True
 
 
@@ -105,8 +112,9 @@ def test_set_repeat(toodledo):
 
 
 def test_set_parent(toodledo):
-    task = CreateATask(toodledo, Task(parent=12345))
-    toodledo.DeleteTasks([task])
+    parentTask = CreateATask(toodledo, Task())
+    childTask = CreateATask(toodledo, Task(parent=parentTask.id_))
+    toodledo.DeleteTasks([parentTask, childTask])
 
 
 def test_set_priority(toodledo):
