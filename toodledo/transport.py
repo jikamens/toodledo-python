@@ -239,8 +239,20 @@ class Toodledo:
             response = self._Session().post(
                 Toodledo.addTasksUrl, params={"tasks": dumps(listDump)})
             response.raise_for_status()
-            if "errorCode" in response.json():
-                raise ToodledoError(response.json()["errorCode"])
+            taskResponse = response.json()
+            errors = []
+            if isinstance(taskResponse, list):
+                for response in taskResponse:
+                    if "errorCode" in response:
+                        errors.append(ToodledoError(response["errorCode"]))
+            elif "errorCode" in taskResponse:
+                errors.append(ToodledoError(taskResponse["errorCode"]))
+            if len(errors) == 1:
+                raise errors[0]
+            if errors:
+                # pylint: disable=broad-exception-raised
+                raise Exception(str(errors))
+                # pylint: enable=broad-exception-raised
             if len(taskList[start:start + limit]) < limit:
                 break
             start += limit
