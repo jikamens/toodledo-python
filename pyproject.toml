@@ -2,7 +2,8 @@
 name = "toodledo"
 version = "1.1.1"
 description = "Python wrapper for the Toodledo v3 API which is documented at http://api.toodledo.com/3/"
-authors = ["Rehan Khwaja <rehan@khwaja.name>"]
+authors = ["Jonathan Kamens <jik@kamens.us>",
+           "Rehan Khwaja <rehan@khwaja.name>"]
 license = "MIT"
 readme = "README.rst"
 homepage = "https://github.com/rkhwaja/toodledo-python"
