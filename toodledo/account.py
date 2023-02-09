@@ -10,8 +10,9 @@ class _Account:  # pylint: disable=too-few-public-methods
         self.lastDeleteTask = lastDeleteTask
 
     def __repr__(self):
-        return (f"<_Account lastEditTask={self.lastEditTask}, "
-                f"lastDeleteTask={self.lastDeleteTask}>")
+        attributes = sorted([f"{name}={item}"
+                             for name, item in self.__dict__.items()])
+        return f"<Account {', '.join(attributes)}>"
 
 
 class _AccountSchema(Schema):
