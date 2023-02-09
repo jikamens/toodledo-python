@@ -87,7 +87,7 @@ class Toodledo:
         """Add folder, return the created folder"""
         response = self._Session().post(
             Toodledo.addFolderUrl,
-            params={
+            data={
                 "name": folder.name,
                 "private": 1 if folder.private else 0
             })
@@ -100,7 +100,7 @@ class Toodledo:
     def DeleteFolder(self, folder):
         """Delete folder"""
         response = self._Session().post(Toodledo.deleteFolderUrl,
-                                        params={"id": folder.id_})
+                                        data={"id": folder.id_})
         response.raise_for_status()
         jsonResponse = response.json()
         if "errorCode" in jsonResponse:
@@ -112,7 +112,7 @@ class Toodledo:
         """Edits the given folder to have the given properties"""
         folderData = _FolderSchema().dump(folder)
         response = self._Session().post(Toodledo.editFolderUrl,
-                                        params=folderData)
+                                        data=folderData)
         response.raise_for_status()
         responseAsDict = response.json()
         if "errorCode" in responseAsDict:
@@ -131,7 +131,7 @@ class Toodledo:
         """Add context, return the created context"""
         response = self._Session().post(
             Toodledo.addContextUrl,
-            params={
+            data={
                 "name": context.name,
                 "private": 1 if context.private else 0
             })
@@ -144,7 +144,7 @@ class Toodledo:
     def DeleteContext(self, context):
         """Delete context"""
         response = self._Session().post(
-            Toodledo.deleteContextUrl, params={"id": context.id_})
+            Toodledo.deleteContextUrl, data={"id": context.id_})
         response.raise_for_status()
         jsonResponse = response.json()
         if "errorCode" in jsonResponse:
@@ -156,7 +156,7 @@ class Toodledo:
         """Edits the given folder to have the given properties"""
         contextData = _ContextSchema().dump(context)
         response = self._Session().post(
-            Toodledo.editContextUrl, params=contextData)
+            Toodledo.editContextUrl, data=contextData)
         response.raise_for_status()
         responseAsDict = response.json()
         if "errorCode" in responseAsDict:
@@ -206,7 +206,7 @@ class Toodledo:
             debug(f"Start: {start}")
             listDump = _DumpTaskList(taskList[start:start + limit])
             response = self._Session().post(
-                Toodledo.editTasksUrl, params={"tasks": dumps(listDump)})
+                Toodledo.editTasksUrl, data={"tasks": dumps(listDump)})
             response.raise_for_status()
             debug(f"Response: {response},{response.text}")
             taskResponse = response.json()
@@ -237,7 +237,7 @@ class Toodledo:
             debug(f"Start: {start}")
             listDump = _DumpTaskList(taskList[start:start + limit])
             response = self._Session().post(
-                Toodledo.addTasksUrl, params={"tasks": dumps(listDump)})
+                Toodledo.addTasksUrl, data={"tasks": dumps(listDump)})
             response.raise_for_status()
             taskResponse = response.json()
             errors = []
@@ -268,7 +268,7 @@ class Toodledo:
             debug(f"Start: {start}")
             response = self._Session().post(
                 Toodledo.deleteTasksUrl,
-                params={
+                data={
                     "tasks": dumps(taskIdList[start:start + limit])
                 })
             response.raise_for_status()
