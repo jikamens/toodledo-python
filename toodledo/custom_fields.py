@@ -16,7 +16,8 @@ class _ToodledoDate(fields.Field):
     def _serialize(self, value, attr, obj, **kwargs):
         if value is None:
             return 0
-        return datetime(year=value.year, month=value.month, day=value.day, hour=12, minute=0, tzinfo=timezone.utc).timestamp()
+        return datetime(year=value.year, month=value.month, day=value.day,
+                        hour=12, minute=0, tzinfo=timezone.utc).timestamp()
 
     def _deserialize(self, value, attr, data, partial=True, **kwargs):
         if value == 0:
@@ -48,7 +49,8 @@ class _ToodledoTags(fields.Field):
             return []
         return [x.strip() for x in value.split(",")]
 
-# Can't use the standard marshmallow boolean because it serializes to True/False rather than 1/0
+# Can't use the standard marshmallow boolean because it serializes to
+# True/False rather than 1/0
 class _ToodledoBoolean(fields.Field):
     def _serialize(self, value, attr, obj, **kwargs):
         assert isinstance(value, bool)

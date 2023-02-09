@@ -10,7 +10,8 @@ class Folder: # pylint: disable=too-few-public-methods
             setattr(self, name, item)
 
     def __repr__(self):
-        attributes = sorted([f"{name}={item}" for name, item in self.__dict__.items()])
+        attributes = sorted([f"{name}={item}"
+                             for name, item in self.__dict__.items()])
         return f"<Folder {', '.join(attributes)}>"
 
 class _FolderSchema(Schema):

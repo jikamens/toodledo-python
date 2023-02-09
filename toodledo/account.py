@@ -9,7 +9,8 @@ class _Account: # pylint: disable=too-few-public-methods
         self.lastDeleteTask = lastDeleteTask
 
     def __repr__(self):
-        return f"<_Account lastEditTask={self.lastEditTask}, lastDeleteTask={self.lastDeleteTask}>"
+        return (f"<_Account lastEditTask={self.lastEditTask}, "
+                f"lastDeleteTask={self.lastDeleteTask}>")
 
 class _AccountSchema(Schema):
     userid = fields.String()

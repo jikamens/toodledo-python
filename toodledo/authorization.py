@@ -18,6 +18,8 @@ def CommandLineAuthorization(clientId, clientSecret, scope, tokenStorage):
 
     redirectResponse = input("Paste the full redirect URL here: ")
 
-    token = session.fetch_token(Toodledo.tokenUrl, client_secret=clientSecret, authorization_response=redirectResponse, token_updater=tokenStorage.Save)
+    token = session.fetch_token(Toodledo.tokenUrl, client_secret=clientSecret,
+                                authorization_response=redirectResponse,
+                                token_updater=tokenStorage.Save)
     tokenStorage.Save(token)
     return token

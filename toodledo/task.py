@@ -3,7 +3,17 @@
 from marshmallow import fields, post_load, Schema, INCLUDE
 from marshmallow.validate import Length
 
-from .custom_fields import _ToodledoBoolean, _ToodledoDate, _ToodledoDatetime, _ToodledoDueDateModifier, _ToodledoListId, _ToodledoPriority, _ToodledoStatus, _ToodledoTags, _ToodledoInteger
+from .custom_fields import (
+    _ToodledoBoolean,
+    _ToodledoDate,
+    _ToodledoDatetime,
+    _ToodledoDueDateModifier,
+    _ToodledoListId,
+    _ToodledoPriority,
+    _ToodledoStatus,
+    _ToodledoTags,
+    _ToodledoInteger,
+)
 
 class Task:
     """Represents a single task"""
@@ -13,7 +23,8 @@ class Task:
             setattr(self, name, item)
 
     def __repr__(self):
-        attributes = sorted([f"{name}={item}" for name, item in self.__dict__.items()])
+        attributes = sorted([f"{name}={item}"
+                             for name, item in self.__dict__.items()])
         return f"<Task {', '.join(attributes)}>"
 
     def IsComplete(self):

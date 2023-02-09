@@ -13,7 +13,8 @@ class TokenReadOnly:
         self.token = self.Load()
 
     def Save(self, token):
-        """Do nothing - this may cause a problem if the refresh token changes"""
+        """Do nothing - this may cause a problem if the refresh token
+        changes"""
         self.token = token
 
     def Load(self):
@@ -27,4 +28,7 @@ def toodledo():
     else:
         # for travis
         tokenStorage = TokenReadOnly("TOODLEDO_TOKEN_READONLY")
-    return Toodledo(clientId=environ["TOODLEDO_CLIENT_ID"], clientSecret=environ["TOODLEDO_CLIENT_SECRET"], tokenStorage=tokenStorage, scope="basic tasks notes folders write")
+    return Toodledo(clientId=environ["TOODLEDO_CLIENT_ID"],
+                    clientSecret=environ["TOODLEDO_CLIENT_SECRET"],
+                    tokenStorage=tokenStorage,
+                    scope="basic tasks notes folders write")

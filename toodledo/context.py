@@ -10,7 +10,8 @@ class Context: # pylint: disable=too-few-public-methods
             setattr(self, name, item)
 
     def __repr__(self):
-        attributes = sorted([f"{name}={item}" for name, item in self.__dict__.items()])
+        attributes = sorted([f"{name}={item}"
+                             for name, item in self.__dict__.items()])
         return f"<Context {', '.join(attributes)}>"
 
 class _ContextSchema(Schema):

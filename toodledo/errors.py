@@ -24,10 +24,13 @@ class ToodledoError(Exception):
             306: "Nothing was edited.",
             601: "Your task must have a title.",
             602: "Only 50 tasks can be added/edited/deleted at a time.",
-            603: "The maximum number of tasks allowed per account (20000) has been reached",
+            603: ("The maximum number of tasks allowed per account (20000) "
+                  "has been reached"),
             604: "Empty id",
             605: "Invalid task",
-            606: "Nothing was added/edited. You'll get this error if you attempt to edit a task but don't pass any parameters to edit.",
+            606: ("Nothing was added/edited. You'll get this error if you "
+                  "attempt to edit a task but don't pass any parameters to "
+                  "edit."),
             607: "Invalid folder id",
             608: "Invalid context id",
             609: "Invalid goal id",
@@ -41,5 +44,6 @@ class ToodledoError(Exception):
     }
 
     def __init__(self, errorCode):
-        errorMessage = ToodledoError.errorCodeToMessage.get(errorCode, "Unknown error")
+        errorMessage = ToodledoError.errorCodeToMessage.get(
+            errorCode, "Unknown error")
         super().__init__(errorMessage, errorCode)

@@ -29,7 +29,8 @@ class ToodledoSession(OAuth2Session):
             response.raise_for_status()
         self.refreshing = True
         warning("Received 429 error - refreshing token and retrying")
-        token = self.refresh_token(Toodledo.tokenUrl, **self.auto_refresh_kwargs)
+        token = self.refresh_token(
+            Toodledo.tokenUrl, **self.auto_refresh_kwargs)
         self.token_updater(token)
         return super().request(*args, **kwargs)
 
@@ -63,10 +64,14 @@ class Toodledo:
             raise AuthorizationNeeded("No token in storage")
 
         return ToodledoSession(
-                client_id=self.clientId, token=token, auto_refresh_kwargs={
-                        "client_id": self.clientId,
-                        "client_secret": self.clientSecret
-                }, auto_refresh_url=Toodledo.tokenUrl, token_updater=self.tokenStorage.Save)
+            client_id=self.clientId,
+            token=token,
+            auto_refresh_kwargs={
+                "client_id": self.clientId,
+                "client_secret": self.clientSecret
+            },
+            auto_refresh_url=Toodledo.tokenUrl,
+            token_updater=self.tokenStorage.Save)
 
     def GetFolders(self):
         """Get all the folders as folder objects"""
@@ -77,7 +82,12 @@ class Toodledo:
 
     def AddFolder(self, folder):
         """Add folder, return the created folder"""
-        response = self._Session().post(Toodledo.addFolderUrl, params={"name": folder.name, "private": 1 if folder.private else 0})
+        response = self._Session().post(
+            Toodledo.addFolderUrl,
+            params={
+                "name": folder.name,
+                "private": 1 if folder.private else 0
+            })
         response.raise_for_status()
         if "errorCode" in response.json():
             error(f"Toodledo error: {response.json()}")
@@ -86,7 +96,8 @@ class Toodledo:
 
     def DeleteFolder(self, folder):
         """Delete folder"""
-        response = self._Session().post(Toodledo.deleteFolderUrl, params={"id": folder.id_})
+        response = self._Session().post(Toodledo.deleteFolderUrl,
+                                        params={"id": folder.id_})
         response.raise_for_status()
         jsonResponse = response.json()
         if "errorCode" in jsonResponse:
@@ -97,7 +108,8 @@ class Toodledo:
     def EditFolder(self, folder):
         """Edits the given folder to have the given properties"""
         folderData = _FolderSchema().dump(folder)
-        response = self._Session().post(Toodledo.editFolderUrl, params=folderData)
+        response = self._Session().post(Toodledo.editFolderUrl,
+                                        params=folderData)
         response.raise_for_status()
         responseAsDict = response.json()
         if "errorCode" in responseAsDict:
@@ -114,7 +126,12 @@ class Toodledo:
 
     def AddContext(self, context):
         """Add context, return the created context"""
-        response = self._Session().post(Toodledo.addContextUrl, params={"name": context.name, "private": 1 if context.private else 0})
+        response = self._Session().post(
+            Toodledo.addContextUrl,
+            params={
+                "name": context.name,
+                "private": 1 if context.private else 0
+            })
         response.raise_for_status()
         if "errorCode" in response.json():
             error(f"Toodledo error: {response.json()}")
@@ -123,7 +140,8 @@ class Toodledo:
 
     def DeleteContext(self, context):
         """Delete context"""
-        response = self._Session().post(Toodledo.deleteContextUrl, params={"id": context.id_})
+        response = self._Session().post(
+            Toodledo.deleteContextUrl, params={"id": context.id_})
         response.raise_for_status()
         jsonResponse = response.json()
         if "errorCode" in jsonResponse:
@@ -134,7 +152,8 @@ class Toodledo:
     def EditContext(self, context):
         """Edits the given folder to have the given properties"""
         contextData = _ContextSchema().dump(context)
-        response = self._Session().post(Toodledo.editContextUrl, params=contextData)
+        response = self._Session().post(
+            Toodledo.editContextUrl, params=contextData)
         response.raise_for_status()
         responseAsDict = response.json()
         if "errorCode" in responseAsDict:
@@ -173,7 +192,8 @@ class Toodledo:
         return [schema.load(x) for x in allTasks]
 
     def EditTasks(self, taskList):
-        """Change the existing tasks to be the same as the ones in the given list"""
+        """Change the existing tasks to be the same as the ones in the given
+        list"""
         if len(taskList) == 0:
             return
         debug(f"Total tasks to edit: {len(taskList)}")
@@ -182,7 +202,8 @@ class Toodledo:
         while True:
             debug(f"Start: {start}")
             listDump = _DumpTaskList(taskList[start:start + limit])
-            response = self._Session().post(Toodledo.editTasksUrl, params={"tasks": dumps(listDump)})
+            response = self._Session().post(
+                Toodledo.editTasksUrl, params={"tasks": dumps(listDump)})
             response.raise_for_status()
             debug(f"Response: {response},{response.text}")
             taskResponse = response.json()
@@ -212,7 +233,8 @@ class Toodledo:
         while True:
             debug(f"Start: {start}")
             listDump = _DumpTaskList(taskList[start:start + limit])
-            response = self._Session().post(Toodledo.addTasksUrl, params={"tasks": dumps(listDump)})
+            response = self._Session().post(
+                Toodledo.addTasksUrl, params={"tasks": dumps(listDump)})
             response.raise_for_status()
             if "errorCode" in response.json():
                 raise ToodledoError(response.json()["errorCode"])
@@ -229,7 +251,11 @@ class Toodledo:
         start = 0
         while True:
             debug(f"Start: {start}")
-            response = self._Session().post(Toodledo.deleteTasksUrl, params={"tasks": dumps(taskIdList[start:start + limit])})
+            response = self._Session().post(
+                Toodledo.deleteTasksUrl,
+                params={
+                    "tasks": dumps(taskIdList[start:start + limit])
+                })
             response.raise_for_status()
             if "errorCode" in response.json():
                 raise ToodledoError(response.json()["errorCode"])

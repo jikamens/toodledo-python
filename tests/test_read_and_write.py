@@ -7,7 +7,8 @@ def CreateATask(toodledo, task):
     task.title = str(uuid4())
     toodledo.AddTasks([task])
     tasks = toodledo.GetTasks(
-            params={"fields": "startdate,duedate,tag,star,priority,duedatemod,status,length,note,repeat,parent"})
+            params={"fields": "startdate,duedate,tag,star,priority,duedatemod,"
+                    "status,length,note,repeat,parent"})
     assert isinstance(tasks, list)
     assert len(tasks) >= 1
 
@@ -18,18 +19,28 @@ def CreateATask(toodledo, task):
     print(returnedTask)
 
     assert task.title == returnedTask.title
-    assert hasattr(task, "completedDate") is False or task.completedDate is None
-    assert hasattr(task, "startDate") is False or task.startDate == returnedTask.startDate
-    assert hasattr(task, "dueDate") is False or task.dueDate == returnedTask.dueDate
-    assert hasattr(task, "tags") is False or set(task.tags) == set(returnedTask.tags)
+    assert (hasattr(task, "completedDate") is False or
+            task.completedDate is None)
+    assert (hasattr(task, "startDate") is False or
+            task.startDate == returnedTask.startDate)
+    assert (hasattr(task, "dueDate") is False or
+            task.dueDate == returnedTask.dueDate)
+    assert (hasattr(task, "tags") is False or
+            set(task.tags) == set(returnedTask.tags))
     assert hasattr(task, "star") is False or task.star == returnedTask.star
-    assert hasattr(task, "priority") is False or task.priority == returnedTask.priority
-    assert hasattr(task, "dueDateModifier") is False or task.dueDateModifier == returnedTask.dueDateModifier
-    assert hasattr(task, "status") is False or task.status == returnedTask.status
-    assert hasattr(task, "length") is False or task.length == returnedTask.length
+    assert (hasattr(task, "priority") is False or
+            task.priority == returnedTask.priority)
+    assert (hasattr(task, "dueDateModifier") is False or
+            task.dueDateModifier == returnedTask.dueDateModifier)
+    assert (hasattr(task, "status") is False or
+            task.status == returnedTask.status)
+    assert (hasattr(task, "length") is False or
+            task.length == returnedTask.length)
     assert hasattr(task, "note") is False or task.note == returnedTask.note
-    assert hasattr(task, "repeat") is False or task.repeat == returnedTask.repeat
-    assert hasattr(task, "parent") is False or task.parent == returnedTask.parent
+    assert (hasattr(task, "repeat") is False or
+            task.repeat == returnedTask.repeat)
+    assert (hasattr(task, "parent") is False or
+            task.parent == returnedTask.parent)
 
     return returnedTask
 
@@ -94,10 +105,14 @@ def test_set_priority(toodledo):
     toodledo.DeleteTasks([task])
 
 def test_set_due_date_modifier(toodledo):
-    task = CreateATask(toodledo, Task(dueDate=date.today(), dueDateModifier=DueDateModifier.DUE_AFTER))
+    task = CreateATask(
+        toodledo,
+        Task(dueDate=date.today(), dueDateModifier=DueDateModifier.DUE_AFTER))
     toodledo.DeleteTasks([task])
 
-    task = CreateATask(toodledo, Task(dueDate=date.today(), dueDateModifier=DueDateModifier.DUE_ON))
+    task = CreateATask(
+        toodledo,
+        Task(dueDate=date.today(), dueDateModifier=DueDateModifier.DUE_ON))
     toodledo.DeleteTasks([task])
 
 def test_write_then_read(toodledo):

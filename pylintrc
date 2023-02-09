@@ -1,6 +1,6 @@
 [FORMAT]
 indent-string="    "
-max-line-length=200
+max-line-length=79
 
 [MESSAGES CONTROL]
 disable=duplicate-code, fixme, invalid-name, len-as-condition,

@@ -2,7 +2,8 @@ from uuid import uuid4
 
 from toodledo import Folder
 
-# There's no export for these in the toodledo web interface so the user will have to make them themselves
+# There's no export for these in the toodledo web interface so the user will
+# have to make them themselves
 def test_get_known_folders(toodledo):
     folders = toodledo.GetFolders()
     assert isinstance(folders, list)

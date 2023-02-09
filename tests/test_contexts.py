@@ -2,7 +2,8 @@ from uuid import uuid4
 
 from toodledo import Context
 
-# There's no export for these in the toodledo web interface so the user will have to make them themselves
+# There's no export for these in the toodledo web interface so the user will
+# have to make them themselves
 def test_get_known_contexts(toodledo):
     contexts = toodledo.GetContexts()
     changed = False
