@@ -10,3 +10,4 @@ poetry.lock
 .venv
 .style.yapf
 .idea
+README.html
