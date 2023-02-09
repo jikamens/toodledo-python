@@ -6,22 +6,39 @@ from toodledo import Folder
 # There's no export for these in the toodledo web interface so the user will
 # have to make them themselves
 def test_get_known_folders(toodledo):
-    folders = toodledo.GetFolders()
+    wanted_folders = ([None, "Test Folder", False, False],
+                      [None, "Test Folder - archived", True, False],
+                      [None, "Test Folder - private", False, True])
+
+    attempts = 0
+    changed = True
+    while changed and attempts < 2:
+        changed = False
+        attempts += 1
+        folders = toodledo.GetFolders()
+        for wanted in wanted_folders:
+            try:
+                wanted[0] = next(f for f in folders if f.name == wanted[1])
+            except StopIteration:
+                newFolder = toodledo.AddFolder(
+                    Folder(name=wanted[1], archived=wanted[2],
+                           private=wanted[3]))
+                if wanted[2]:
+                    newFolder.archived = True
+                    toodledo.EditFolder(newFolder)
+                changed = True
+
     assert isinstance(folders, list)
-    assert len(folders) == 3
-    folder = folders[0]
-    assert folder.name == "Test Folder"
-    assert folder.archived is False
-    assert folder.order == 1
-    assert folder.private is False
+    assert len(folders) >= 3
 
-    assert folders[1].name == "Test Folder - archived"
-    assert folders[1].archived is True
-    assert folders[1].private is False
+    orders = set()
+    for wanted in wanted_folders:
+        folder = next(f for f in folders if f.name == wanted[1])
+        assert folder.archived is wanted[2]
+        assert folder.private is wanted[3]
+        orders.add(folder.order)
 
-    assert folders[2].name == "Test Folder - private"
-    assert folders[2].archived is False
-    assert folders[2].private is True
+    assert len(orders) == len(wanted_folders)
 
 
 def test_add_edit_delete_folder(toodledo):
