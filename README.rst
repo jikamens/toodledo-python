@@ -80,8 +80,8 @@ the library. ``poetry build`` builds packages, and ``poetry publish``
 publishes them to PyPI.
 
 All the code in the library is both pylint and flake8 clean, and any
-PRs that are submitted should maintain that. Run ``pylint *.py tests
-toodledo`` and ``flake8`` to check everything.
+PRs that are submitted should maintain that. Run ``poetry run pylint
+*.py tests toodledo`` and ``poetry run flake8`` to check everything.
 
 To run the tests, set the following environment variables:
 
@@ -96,13 +96,13 @@ Then generate the credentials json file by running
 
 .. code-block:: bash
 
-  python generate-credentials.py
+  poetry run python generate-credentials.py
 
 Then run the tests by executing
 
 .. code-block:: bash
 
-  pytest
+  poetry run pytest
 
 in the root directory.
 
