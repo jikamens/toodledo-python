@@ -1,5 +1,5 @@
 [FORMAT]
-indent-string=\t
+indent-string="    "
 max-line-length=200
 
 [MESSAGES CONTROL]
