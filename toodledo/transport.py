@@ -10,6 +10,7 @@ from .context import _ContextSchema
 from .errors import ToodledoError
 from .folder import _FolderSchema
 from .task import _DumpTaskList, _TaskSchema
+from .deleted_task import _DeletedTaskSchema
 
 
 class AuthorizationNeeded(Exception):
@@ -46,6 +47,7 @@ class Toodledo:
     getAccountUrl = baseUrl + "account/get.php"
     getTasksUrl = baseUrl + "tasks/get.php"
     deleteTasksUrl = baseUrl + "tasks/delete.php"
+    getDeletedTasksUrl = baseUrl + "tasks/deleted.php"
     addTasksUrl = baseUrl + "tasks/add.php"
     editTasksUrl = baseUrl + "tasks/edit.php"
     getFoldersUrl = baseUrl + "folders/get.php"
@@ -196,6 +198,24 @@ class Toodledo:
             start += limit
         schema = _TaskSchema()
         return [schema.load(x) for x in allTasks]
+
+    def GetDeletedTasks(self, after):
+        """Get a list of deleted tasks.
+
+        Required arguments:
+        after -- Return tasks deleted after this UNIX timestamp
+        """
+        response = self._Session().get(Toodledo.getDeletedTasksUrl,
+                                       params={'after': after})
+        response.raise_for_status()
+        deleted = response.json()
+        if "errorCode" in deleted:
+            self.logger.error("Toodledo error: %s", deleted)
+            raise ToodledoError(deleted["errorCode"])
+        # the first field contains the count or the error code
+        self.logger.debug("Retrieved %d deleted tasks", len(deleted) - 1)
+        schema = _DeletedTaskSchema()
+        return [schema.load(x) for x in deleted[1:]]
 
     def EditTasks(self, taskList):
         """Change the existing tasks to be the same as the ones in the given
