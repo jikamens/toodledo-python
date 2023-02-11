@@ -74,20 +74,20 @@ Using the task cache
 --------------------
 
 In addition to close-to-the-metal access to the API endpoints, this
-library also implements a `TaskCache` class that you can use to cache
-tasks persistently in a file which is updated incrementally when
+library also implements a ``TaskCache`` class that you can use to
+cache tasks persistently in a file which is updated incrementally when
 things change in Toodledo. Import the class and look at its help
 string for more information.
 
-When you're using a cache, you can call `AddTasks`, `EditTasks`, and
-`DeleteTasks` through the cache object rather than directly through
-the API object; otherwise the cache won't reflect the changes you make
-until you call `update()` explicitly on the cache. If you're making a
-bunch of updates in a row, you might want to them directly through the
-API and then call `update()` to minimize the number of API calls to
-the server.
+When you're using a cache, you can call ``AddTasks``, ``EditTasks``,
+and ``DeleteTasks`` through the cache object rather than directly
+through the API object; otherwise the cache won't reflect the changes
+you make until you call ``update()`` explicitly on the cache. If
+you're making a bunch of updates in a row, you might want to them
+directly through the API and then call ``update()`` to minimize the
+number of API calls to the server.
 
-When you're using the cache, instead of using `GetTasks` you will
+When you're using the cache, instead of using ``GetTasks`` you will
 probably want to read tasks through the cache, which you can do simply
 by treating the cache object as a list of available tasks.
 
