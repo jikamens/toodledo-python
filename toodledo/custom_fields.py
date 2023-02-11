@@ -38,6 +38,22 @@ class _ToodledoDatetime(fields.Field):
     def _deserialize(self, value, attr, data, partial=True, **kwargs):
         if value == 0:
             return None
+        return datetime.utcfromtimestamp(float(value)).replace(
+            tzinfo=timezone.utc)
+
+
+# states for this field are:
+# a GMT timestamp
+# unset, represented by API as 0
+class _ToodledoFloatingDatetime(fields.Field):
+    def _serialize(self, value, attr, obj, **kwargs):
+        if value is None:
+            return 0
+        return value.replace(tzinfo=timezone.utc).timestamp()
+
+    def _deserialize(self, value, attr, data, partial=True, **kwargs):
+        if value == 0:
+            return None
         return datetime.utcfromtimestamp(float(value))
 
 

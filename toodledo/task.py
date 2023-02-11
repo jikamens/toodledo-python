@@ -7,6 +7,7 @@ from .custom_fields import (
     _ToodledoBoolean,
     _ToodledoDate,
     _ToodledoDatetime,
+    _ToodledoFloatingDatetime,
     _ToodledoDueDateModifier,
     _ToodledoListId,
     _ToodledoPriority,
@@ -39,7 +40,7 @@ class _TaskSchema(Schema):
     tags = _ToodledoTags(data_key="tag")
     startDate = _ToodledoDate(data_key="startdate")
     dueDate = _ToodledoDate(data_key="duedate")
-    dueTime = _ToodledoDatetime(data_key="duetime")
+    dueTime = _ToodledoFloatingDatetime(data_key="duetime")
     modified = _ToodledoDatetime()
     completedDate = _ToodledoDate(data_key="completed")
     star = _ToodledoBoolean()
