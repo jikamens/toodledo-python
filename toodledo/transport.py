@@ -20,17 +20,17 @@ class ToodledoSession(OAuth2Session):
     """Refresh token when we get a 429 error"""
     def __init__(self, *args, **kwargs):
         self.toodledo_logger = logging.getLogger(__name__)
-        self.refreshing = False
+        self.toodledo_refreshing = False
         super().__init__(*args, **kwargs)
 
     def request(self, *args, **kwargs):  # pylint: disable=too-many-arguments
         response = super().request(*args, **kwargs)
         if response.status_code != 429:
-            self.refreshing = False
+            self.toodledo_refreshing = False
             return response
-        if self.refreshing:
+        if self.toodledo_refreshing:
             response.raise_for_status()
-        self.refreshing = True
+        self.toodledo_refreshing = True
         self.toodledo_logger.warning(
             "Received 429 error - refreshing token and retrying")
         token = self.refresh_token(
