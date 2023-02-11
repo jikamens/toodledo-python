@@ -192,8 +192,8 @@ class Toodledo:
                 raise ToodledoError(tasks["errorCode"])
             # the first field contains the count or the error code
             allTasks.extend(tasks[1:])
-            self.logger.debug("Retrieved %d tasks", len(tasks[1:]))
-            if len(tasks[1:]) < limit:
+            self.logger.debug("Retrieved %d tasks", len(tasks) - 1)
+            if len(tasks) - 1 < limit:
                 break
             start += limit
         schema = _TaskSchema()
