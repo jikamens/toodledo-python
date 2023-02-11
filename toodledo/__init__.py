@@ -6,5 +6,6 @@ from .context import Context
 from .folder import Folder
 from .storage import TokenStorageFile
 from .task import Task
+from .task_cache import TaskCache
 from .transport import AuthorizationNeeded, Toodledo, ToodledoError
 from .types import DueDateModifier, Priority, Status
