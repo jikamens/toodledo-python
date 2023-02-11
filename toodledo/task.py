@@ -41,6 +41,7 @@ class _TaskSchema(Schema):
     startDate = _ToodledoDate(data_key="startdate")
     dueDate = _ToodledoDate(data_key="duedate")
     dueTime = _ToodledoFloatingDatetime(data_key="duetime")
+    startTime = _ToodledoFloatingDatetime(data_key="starttime")
     modified = _ToodledoDatetime()
     completedDate = _ToodledoDate(data_key="completed")
     star = _ToodledoBoolean()
