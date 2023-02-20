@@ -6,7 +6,7 @@ lint: check-secrets
 	poetry run flake8
 
 test: check-secrets test-secrets.sh test-token.json
-	. ./test-secrets.sh; poetry run pytest
+	. ./test-secrets.sh; poetry run pytest $(PYTEST_ARGS)
 
 publish:
 	poetry publish
