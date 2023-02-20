@@ -213,6 +213,8 @@ class Toodledo:
         Required arguments:
         after -- Return tasks deleted after this UNIX timestamp
         """
+        if isinstance(after, datetime.datetime):
+            after = after.timestamp()
         response = self._Session().get(Toodledo.getDeletedTasksUrl,
                                        params={'after': after})
         response.raise_for_status()
