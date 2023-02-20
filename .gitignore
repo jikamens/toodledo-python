@@ -11,3 +11,4 @@ poetry.lock
 .style.yapf
 .idea
 README.html
+test-secrets.sh

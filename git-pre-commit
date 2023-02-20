@@ -1,0 +1,8 @@
+#!/bin/bash -e
+
+while read status file; do
+    if [ "$file" == "test-token.json" -o "$file" == "test-secrets.sh" ]; then
+        echo "Can't commit \"$file\" to repository" 1>&2
+        exit 1
+    fi
+done < <(git status --porcelain)
