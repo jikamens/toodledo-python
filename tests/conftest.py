@@ -43,3 +43,23 @@ def toodledo(request):
                 'duedatemod,length,note,parent,priority,repeat,star,startdate,'
                 'status,tag')
         yield session
+
+
+@fixture(scope='session', params=[None, 0, 1])
+def cache(request):
+    if "TOODLEDO_TOKEN_STORAGE" in os.environ:
+        tokenStorage = TokenStorageFile(os.environ["TOODLEDO_TOKEN_STORAGE"])
+    else:
+        # for travis
+        tokenStorage = TokenReadOnly("TOODLEDO_TOKEN_READONLY")
+    session = Toodledo(clientId=os.environ["TOODLEDO_CLIENT_ID"],
+                       clientSecret=os.environ["TOODLEDO_CLIENT_SECRET"],
+                       tokenStorage=tokenStorage,
+                       scope="basic tasks notes folders write")
+    with NamedTemporaryFile() as cache_file:
+        os.unlink(cache_file.name)
+        session = TaskCache(
+            session, cache_file.name, fields='folder,context,duedate,'
+            'duedatemod,length,note,parent,priority,repeat,star,startdate,'
+            'status,tag', comp=request.param)
+        yield session

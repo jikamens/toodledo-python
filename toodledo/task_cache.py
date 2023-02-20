@@ -1,3 +1,4 @@
+from contextlib import contextmanager
 import datetime
 import logging
 import os
@@ -12,20 +13,45 @@ class TaskCache:
     A loaded task cache can be treated as a read-only list to access the tasks
     in the cache. Modifying objects in the cache directly will NOT update tasks
     in Toodledo or the cache on disk. To do that, you need to use the cache's
-    EditTasks method.
+    AddTasks, EditTasks, and DeleteTasks methods.
 
     Behavior is completely undefined if you update the cache or edit while
     iterating over the cache.
 
-    Properties:
-    last_update -- List of updated tasks fetched in the last update
-    last_delete -- List of deleted tasks fetched in the last update
+    This function has all the same methods as the `Toodledo` session class, so
+    you can use it as a drop-in replacement. And vice versa... The session
+    class has a bunch of no-op functions (e.g., `save()`, `update()` so code
+    written to use the cache will work fine using the session cache directory,
+    just a bit slower.
+
+    The cache updates automatically when you instantiate it unless you specify
+    `update=False`. After that, any changes you make through the cache object
+    are reflected in the cache, but changes made by someone else aren't until
+    you call `update()` on the cache object.
+
+    Call `save()` on the cache object to write it to disk. This happens
+    automatically when you call `update()` unless you specify `autosave=False`
+    when instantiating the cache.
+
+    if you specify `comp=0` or `comp=1` when instantiating the cache, then
+    you can use the `caching_everything()` context manager on the cache object
+    to temporarily cache all newly completed or incompleted tasks. When the
+    context exits, any tasks in the cache that don't match your persistent
+    `comp` setting are removed from the cache. Using the cache this way is
+    encouraged, because anyone who has been on Toodledo for a long time
+    probably has many completed tasks, and you probably don't care about most
+    of them most of the time in your code, so `comp=0` is probably the right
+    way to use the cache most of the time.
+
+    The `Toodledo` session class has a no-op `caching_everything()`
+    context manager to preserve the ability to use the session and
+    cache objects interchangeably.
     """
     schema = _TaskSchema()
     fields_map = {f.data_key or k: k for k, f in schema.fields.items()}
 
-    def __init__(self, toodledo, path, update=True, autosave=True, comp=None,
-                 fields=''):
+    def __init__(self, toodledo, path,  # pylint: disable=too-many-branches
+                 update=True, autosave=True, comp=None, fields=''):
         """Initialize a new TaskCache object.
 
         Required arguments:
@@ -34,7 +60,7 @@ class TaskCache:
 
         Keyword arguments:
         update -- update cache automatically now (default: True)
-        autosave -- save cache automatically when modified (default: True)
+        autosave -- save cache automatically when updated (default: True)
         comp -- (int) 0 to cache only uncompleted tasks, 1 for only completed
                 tasks
         fields -- (string) optional fields to fetch and cache as per API
@@ -51,13 +77,15 @@ class TaskCache:
         if comp is not None and comp != 0 and comp != 1:
             raise ValueError(f'"comp" should be 0 or 1, not "{comp}"')
         self.comp = comp
+        if self.comp is not None and self.comp not in (0, 1):
+            raise ValueError(f'comp must be 0 or 1, not "{self.comp}')
         self.fields = fields
         if self.fields:
             self._check_fields(self.fields)
-        if os.path.exists(path):
-            self.load_from_path()
-        else:
+        if not os.path.exists(path):
             self._new_cache()
+            return
+        self.load_from_path()
         if self.cache.get('version', None) is None:
             self.cache['version'] = 1
         if self.cache['version'] < 2:
@@ -67,6 +95,14 @@ class TaskCache:
         if self.cache['version'] < 3:
             self.cache['newest_delete'] = self.cache['newest']
             self.cache['version'] = 3
+        if self.cache['version'] < 4:
+            if not self.cache['fields'] or \
+               'repeat' not in self.cache['fields'].split(','):
+                self.logger.warning(
+                    'Saved cache incompatible with current code; '
+                    'reloading cache')
+                self._new_cache()
+                return
         if self.cache['comp'] != self.comp:
             if self.cache['comp'] is not None:
                 raise ValueError(
@@ -74,6 +110,10 @@ class TaskCache:
                     f"specifying comp={self.cache['comp']}")
             # Safe to downgrade cache
             self.cache['comp'] = self.comp
+        if not self.fields:
+            self.fields = 'repeat'
+        elif 'repeat' not in self.fields.split('.'):
+            self.fields = 'repeat,' + self.fields
         if self.cache['fields'] != self.fields:
             missing = self._missing_fields(self.fields)
             if missing:
@@ -119,13 +159,33 @@ class TaskCache:
             pickle.dump(self.cache, f)
         self.logger.debug('Dumped to %s', path)
 
+    @contextmanager
+    def caching_everything(self):
+        old_comp = self.comp
+        try:
+            if self.comp is not None:
+                self.comp = None
+            yield
+            if old_comp is not None:
+                self.cache['tasks'] = [
+                    t for t in self.cache['tasks']
+                    if (getattr(t, 'completedDate', None) and
+                        old_comp == 1) or
+                    (not getattr(t, 'completedDate', None) and
+                     old_comp == 0)]
+        finally:
+            self.comp = old_comp
+
     def _new_cache(self):
         cache = {}
         params = {}
         if self.comp is not None:
             params['comp'] = self.comp
-        if self.fields:
-            params['fields'] = self.fields
+        if not self.fields:
+            self.fields = 'repeat'
+        elif 'repeat' not in self.fields.split(','):
+            self.fields = 'repeat,' + self.fields
+        params['fields'] = self.fields
         cache['tasks'] = self.toodledo.GetTasks(params)
         if cache['tasks']:
             cache['newest'] = max(t.modified for t in cache['tasks'])
@@ -136,7 +196,7 @@ class TaskCache:
             1970, 1, 2, tzinfo=datetime.timezone.utc)
         cache['comp'] = self.comp
         cache['fields'] = self.fields
-        cache['version'] = 3
+        cache['version'] = 4
         self.cache = cache
         self.logger.debug('Initialized new (newest: %s)', cache['newest'])
         if self.autosave:
@@ -191,8 +251,6 @@ class TaskCache:
         self.cache['tasks'] = list(mapped.values())
         if self.autosave:
             self.save()
-        self.last_update = updated_tasks
-        self.last_delete = deleted_tasks
 
     def _check_fields(self, fields):
         if not fields:
@@ -205,8 +263,11 @@ class TaskCache:
 
     def _filter_tasks(self, params):
         params = params.copy()
+        want_fields = params.get('fields', None)
+        want_fields = want_fields.split(',') if want_fields else []
+        want_fields = [self.fields_map[f] for f in want_fields]
         filter_fields = self._missing_fields(
-            self.cache.get('fields', None) or '',
+            self.cache['fields'],
             params.get('fields', None) or '')
         filter_fields = [self.fields_map[f] for f in filter_fields]
         for task in self:
@@ -223,10 +284,16 @@ class TaskCache:
                 continue
             if 'after' in params and task.modified <= params['after']:
                 continue
-            if filter_fields:
+            if filter_fields or want_fields:
                 task = Task(**task.__dict__)
+            if filter_fields:
                 for f in filter_fields:
-                    delattr(task, f)
+                    try:
+                        delattr(task, f)
+                    except AttributeError:
+                        pass
+            for field in want_fields:
+                setattr(task, field, getattr(task, field, None))
             yield task
 
     def GetTasks(self, params):
@@ -240,40 +307,136 @@ class TaskCache:
                 params['before'] = params['before'].timestamp()
             else:
                 filter_params['before'] = datetime.datetime.utcfromtimestamp(
-                    params['before'])
+                    params['before']).replace(tzinfo=datetime.timezone.utc)
         if 'after' in params:
             if isinstance(params['after'], datetime.datetime):
                 params['after'] = params['after'].timestamp()
             else:
                 filter_params['after'] = datetime.datetime.utcfromtimestamp(
-                    params['after'])
+                    params['after']).replace(tzinfo=datetime.timezone.utc)
         if params.get('fields', None):
             self._check_fields(params['fields'])
             missing_fields = self._missing_fields(params['fields'])
             if missing_fields:
                 raise ValueError(
                     f'Requested fields {missing_fields} are not in cache')
-        self.update()
         return list(self._filter_tasks(filter_params))
 
-    def GetDeletedTasks(self, after):
-        # We don't cache this.
-        return self.toodledo.GetDeletedTasks(after)
+    def GetDeletedTasks(self, after, update_cache=True):
+        """Get tasks deleted after the specified timestamp.
+
+        Required arguments:
+        after -- Timestamp to start at
+
+        Keyword arguments:
+        update_cache -- Whether to remove tasks on the list from the cache and
+          update the cache's idea of when we last fetched deleted tasks
+          (default: True)
+        """
+        deleted_tasks = self.toodledo.GetDeletedTasks(after)
+        if update_cache:
+            deleted_ids = [t.id_ for t in deleted_tasks]
+            self.cache['tasks'] = [t for t in self.cache['tasks']
+                                   if t.id_ not in deleted_ids]
+            self.cache['newest_delete'] = max(t.stamp for t in deleted_tasks)
+        return deleted_tasks
 
     def AddTasks(self, tasks):
         """Add the specified tasks and update the cache to reflect them."""
-        self.toodledo.AddTasks(tasks)
-        self.update()
+        added_tasks = self.toodledo.AddTasks(tasks)
+        # Copy so we can modify
+        tasks = [Task(**task.__dict__) for task in tasks]
+        # Update from fields returned by server
+        for i, t in enumerate(tasks):
+            t.__dict__.update(added_tasks[i].__dict__)
+        self.cache['tasks'].extend(
+            t for t in tasks
+            if self.comp is None or
+            self.comp == 0 and not getattr(t, 'completedDate', None) or
+            self.comp == 1 and getattr(t, 'completedDate', None))
+        return added_tasks
 
     def EditTasks(self, tasks):
-        """Edit the specified tasks and update the cache to reflect them."""
-        self.toodledo.EditTasks(tasks)
-        self.update()
+        """Edit the specified tasks and update the cache to reflect them.
+
+        See Toodledo.EditTasks for more information."""
+        #
+        # The most complicated logic in this function is that we have to handle
+        # tasks that are rescheduled by the server. That means:
+        # * Detect when task are going to be rescheduled by the server because
+        #   they're completedDate is being modified and reschedule=1 is set in
+        #   them.
+        # * Remove the reschedule=1 flag from edited tasks before putting them
+        #   in the cache or returning them to the user.
+        # * For tasks that were rescheduled, if comp is None or 1 then we need
+        #   to find the newly completed tasks created automatically by the
+        #   server and add them to the cache.
+        #
+        cache_map = {t.id_: t for t in self.cache['tasks']}
+        rescheduling = (self.comp is None or self.comp == 1) and \
+            any(True for t in tasks
+                if getattr(t, 'reschedule', False) and
+                getattr(t, 'completedDate', None) and
+                (getattr(t, 'repeat', None) or
+                 getattr(t, 'repeat', 'missing') == 'missing') and
+                t.id_ in cache_map and
+                getattr(cache_map[t.id_], 'repeat') and
+                not getattr(cache_map[t.id_], 'completedDate', None))
+        if rescheduling:
+            # So we can use lastEditTask to fetch auto-created completed
+            # clones of rescheduled tasks.
+            account = self.toodledo.GetAccount()
+
+        edited_tasks = self.toodledo.EditTasks(tasks)
+        # Copy so we can modify
+        tasks = [Task(**task.__dict__) for task in tasks]
+
+        for t in tasks:
+            try:
+                delattr(t, 'reschedule')
+            except AttributeError:
+                pass
+
+        # Update from fields returned by server
+        for i, t in enumerate(tasks):
+            t.__dict__.update(edited_tasks[i].__dict__)
+        # Figure out which tasks to update in cache and which to remove
+        if self.comp is None:
+            wanted = tasks
+            unwanted = []
+        else:
+            incomplete = []
+            complete = []
+            for t in tasks:
+                (complete if getattr(t, 'completedDate', None)
+                 else incomplete).append(t)
+            wanted = incomplete if self.comp == 0 else complete
+            unwanted = complete if self.comp == 1 else incomplete
+        # Remove unwanted tasks
+        for t in unwanted:
+            cache_map.pop(t.id_, None)
+        # Update wanted tasks
+        for t in wanted:
+            cache_map[t.id_] = t
+
+        # Handle rescheduled tasks
+        if rescheduling:
+            completed_tasks = self.toodledo.GetTasks(
+                {'comp': 1, 'fields': self.fields,
+                 'after': account.lastEditTask})
+            for t in completed_tasks:
+                cache_map[t.id_] = t
+
+        self.cache['tasks'] = list(cache_map.values())
+
+        return edited_tasks
 
     def DeleteTasks(self, tasks):
         """Delete the specified tasks and update the cache to reflect them."""
         self.toodledo.DeleteTasks(tasks)
-        self.update()
+        deleted_ids = [t.id_ for t in tasks]
+        self.cache['tasks'] = [t for t in self.cache['tasks']
+                               if t.id_ not in deleted_ids]
 
     # Passthrough functions so that the cache object can be a drop-in
     # replacement for the session object.

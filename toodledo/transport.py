@@ -1,5 +1,6 @@
 """Implementation"""
 
+from contextlib import contextmanager
 import datetime
 from json import dumps
 import logging
@@ -228,13 +229,17 @@ class Toodledo:
         return [schema.load(x) for x in deleted[1:]]
 
     def EditTasks(self, taskList):
-        """Change the existing tasks to be the same as the ones in the given
-        list"""
+        """Edit existing tasks as indicated in the specified task objects.
+
+        Only specify fields that need to be changed, except for the id_ field,
+        which must always be specified. In particular, note that if you specify
+        `None` for a field, that means to erase it, not to ignore it!"""
         if len(taskList) == 0:
-            return
+            return []
         self.logger.debug("Total tasks to edit: %d", len(taskList))
         limit = 50  # single request limit
         start = 0
+        responses = []
         while True:
             self.logger.debug("Start: %d", start)
             listDump = _DumpTaskList(taskList[start:start + limit])
@@ -256,16 +261,20 @@ class Toodledo:
                 # pylint: disable=broad-exception-raised
                 raise Exception(str(errors))
                 # pylint: enable=broad-exception-raised
+            responses.extend(taskResponse)
             if len(taskList[start:start + limit]) < limit:
                 break
             start += limit
+        schema = _TaskSchema()
+        return [schema.load(t) for t in responses]
 
     def AddTasks(self, taskList):
         """Add the given tasks"""
         if len(taskList) == 0:
-            return
+            return []
         limit = 50  # single request limit
         start = 0
+        responses = []
         while True:
             self.logger.debug("Start: %d", start)
             listDump = _DumpTaskList(taskList[start:start + limit])
@@ -286,9 +295,12 @@ class Toodledo:
                 # pylint: disable=broad-exception-raised
                 raise Exception(str(errors))
                 # pylint: enable=broad-exception-raised
+            responses.extend(taskResponse)
             if len(taskList[start:start + limit]) < limit:
                 break
             start += limit
+        schema = _TaskSchema()
+        return [schema.load(t) for t in responses]
 
     def DeleteTasks(self, taskList):
         """Delete the given tasks"""
@@ -310,3 +322,19 @@ class Toodledo:
             if len(taskIdList[start:start + limit]) < limit:
                 break
             start += limit
+
+    def save(self):
+        """No-op for drop-in compatibility with TaskCache"""
+
+    def load_from_path(self, path=None):
+        """No-op for drop-in compatibility with TaskCache"""
+
+    def dump_to_path(self, path=None):
+        """No-op for drop-in compatibility with TaskCache"""
+
+    @contextmanager
+    def caching_everything(self):
+        yield
+
+    def update(self):
+        """No-op for drop-in compatibility with TaskCache"""
