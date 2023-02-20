@@ -3,6 +3,8 @@ import logging
 import os
 import pickle
 
+from toodledo.task import _TaskSchema, Task
+
 
 class TaskCache:
     """Automatically maintained local cache of tasks in a Toodledo account.
@@ -19,6 +21,9 @@ class TaskCache:
     last_update -- List of updated tasks fetched in the last update
     last_delete -- List of deleted tasks fetched in the last update
     """
+    schema = _TaskSchema()
+    fields_map = {f.data_key or k: k for k, f in schema.fields.items()}
+
     def __init__(self, toodledo, path, update=True, autosave=True, comp=None,
                  fields=''):
         """Initialize a new TaskCache object.
@@ -47,12 +52,42 @@ class TaskCache:
             raise ValueError(f'"comp" should be 0 or 1, not "{comp}"')
         self.comp = comp
         self.fields = fields
+        if self.fields:
+            self._check_fields(self.fields)
         if os.path.exists(path):
             self.load_from_path()
         else:
             self._new_cache()
         if update:
             self.update()
+        if self.cache.get('version', None) is None:
+            self.cache['version'] = 1
+        if self.cache['version'] < 2:
+            self.cache['comp'] = self.comp
+            self.cache['fields'] = self.fields
+            self.cache['version'] = 2
+        if self.cache['comp'] != self.comp:
+            if self.cache['comp'] is not None:
+                raise ValueError(
+                    f"Can't specify comp={self.comp} after previously "
+                    f"specifying comp={self.cache['comp']}")
+            # Safe to downgrade cache
+            self.cache['comp'] = self.comp
+        if self.cache['fields'] != self.fields:
+            missing = self._missing_fields(self.fields)
+            if missing:
+                raise ValueError(
+                    f"Can't initialize cache with fields {missing} "
+                    f"that weren't requested when cache was created")
+            # Safe to downgrade fields
+            self.cache['fields'] = self.fields
+
+    def _missing_fields(self, want_fields, cache_fields=None):
+        if cache_fields is None:
+            cache_fields = self.cache['fields']
+        cache_fields = (cache_fields.split(',') if cache_fields else [])
+        want_fields = (want_fields.split(',') if want_fields else [])
+        return sorted(set(want_fields) - set(cache_fields))
 
     def save(self):
         """Save the cache to disk."""
@@ -155,6 +190,65 @@ class TaskCache:
         self.last_update = updated_tasks
         self.last_delete = deleted_tasks
 
+    def _check_fields(self, fields):
+        if not fields:
+            return
+        fields = fields.split(',')
+        missing = sorted(f for f in fields if f not in self.fields_map)
+        if missing:
+            raise ValueError(
+                f"Fields not supported by this library: {missing}")
+
+    def _filter_tasks(self, params):
+        params = params.copy()
+        if 'before' in params:
+            params['before'] = datetime.datetime.utcfromtimestamp(
+                params['before'])
+        if 'after' in params:
+            params['after'] = datetime.datetime.utcfromtimestamp(
+                params['after'])
+        filter_fields = self._missing_fields(
+            self.cache.get('fields', None) or '',
+            params.get('fields', None) or '')
+        filter_fields = [self.fields_map[f] for f in filter_fields]
+        for task in self:
+            if 'id' in params:
+                if task.id_ == params['id']:
+                    yield [task]
+                    return
+                continue
+            if params.get('comp', None) == 0 and task.completedDate:
+                continue
+            if params.get('comp', None) == 1 and not task.completedDate:
+                continue
+            if 'before' in params and task.modified >= params['before']:
+                continue
+            if 'after' in params and task.modified <= params['after']:
+                continue
+            if filter_fields:
+                task = Task(**task.__dict__)
+                for f in filter_fields:
+                    delattr(task, f)
+            yield task
+
+    def GetTasks(self, params):
+        comp = params.get('comp', None)
+        if self.comp is not None and self.comp != params['comp']:
+            raise ValueError(f"Can't specify comp={comp} to cache created "
+                             f"with comp={self.comp}")
+        if params.get('fields', None):
+            self._check_fields(params['fields'])
+            missing_fields = self._missing_fields(params['fields'])
+            if missing_fields:
+                raise ValueError(
+                    f'Requested fields {missing_fields} are not in cache')
+        self.update()
+        return list(self._filter_tasks(params))
+
+    def GetDeletedTasks(self, after):
+        # We don't cache this.
+        return self.toodledo.GetDeletedTasks(after)
+
     def AddTasks(self, tasks):
         """Add the specified tasks and update the cache to reflect them."""
         self.toodledo.AddTasks(tasks)
@@ -170,6 +264,36 @@ class TaskCache:
         self.toodledo.DeleteTasks(tasks)
         self.update()
 
+    # Passthrough functions so that the cache object can be a drop-in
+    # replacement for the session object.
+
+    def GetFolders(self):
+        return self.toodledo.GetFolders()
+
+    def AddFolder(self, folder):
+        return self.toodledo.AddFolder(folder)
+
+    def DeleteFolder(self, folder):
+        return self.toodledo.DeleteFolder(folder)
+
+    def EditFolder(self, folder):
+        return self.toodledo.EditFolder(folder)
+
+    def GetContexts(self):
+        return self.toodledo.GetContexts()
+
+    def AddContext(self, context):
+        return self.toodledo.AddContext(context)
+
+    def DeleteContext(self, context):
+        return self.toodledo.DeleteContext(context)
+
+    def EditContext(self, context):
+        return self.toodledo.EditContext(context)
+
+    def GetAccount(self):
+        return self.toodledo.GetAccount()
+
     def __getitem__(self, item):
         return self.cache['tasks'][item]
 
@@ -178,4 +302,4 @@ class TaskCache:
 
     def __repr__(self):
         return (f'<TaskCache ({len(self.cache["tasks"])} items, '
-                f'newest {str(self["cache"]["newest"])})>')
+                f'newest {str(self.cache["newest"])})>')

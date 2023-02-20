@@ -79,17 +79,28 @@ cache tasks persistently in a file which is updated incrementally when
 things change in Toodledo. Import the class and look at its help
 string for more information.
 
-When you're using a cache, you can call ``AddTasks``, ``EditTasks``,
-and ``DeleteTasks`` through the cache object rather than directly
-through the API object; otherwise the cache won't reflect the changes
-you make until you call ``update()`` explicitly on the cache. If
-you're making a bunch of updates in a row, you might want to them
-directly through the API and then call ``update()`` to minimize the
-number of API calls to the server.
+When you're using a cache, you can use the instantiated cache object
+as a drop-in replacement for the session object. All of the task and
+other methods on the session object can be called with the same syntax
+on the cache object: task-related methods will be handled by the
+cache, while other methods will be passed through to the underlying
+session object.
 
-When you're using the cache, instead of using ``GetTasks`` you will
-probably want to read tasks through the cache, which you can do simply
-by treating the cache object as a list of available tasks.
+If you instead call methods directly on the session object that modify
+tasks, i.e., ``AddTasks``, ``EditTasks``, ``DeleteTasks``, then those
+changes won't be reflected in the cache until you call its ``update``
+method explicitly (when you're using the cache as a drop-in
+replacement for the session object, this happens automatically). The
+one time you may wish to do this is if you are making a bunch of
+updates in a row, in which case you might want to defer updating the
+cache until they're all finished.
+
+You can access the tasks in the cache in either of two ways:
+
+* The cache object is itself an iterable of all cached tasks.
+* You can call ``GetTasks`` on the task object exactly as you would on
+  the session object and your query will be retrieved through the
+  cache rather than directly from the server.
 
 Developing the library
 ======================
