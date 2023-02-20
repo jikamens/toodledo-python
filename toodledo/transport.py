@@ -1,5 +1,6 @@
 """Implementation"""
 
+import datetime
 from json import dumps
 import logging
 
@@ -180,6 +181,13 @@ class Toodledo:
         allTasks = []
         limit = 1000  # single request limit
         start = 0
+        params = params.copy()
+        if 'before' in params and isinstance(params['before'],
+                                             datetime.datetime):
+            params['before'] = params['before'].timestamp()
+        if 'after' in params and isinstance(params['after'],
+                                            datetime.datetime):
+            params['after'] = params['after'].timestamp()
         while True:
             self.logger.debug("Start: %d", start)
             params["start"] = start

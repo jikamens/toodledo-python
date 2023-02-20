@@ -201,12 +201,6 @@ class TaskCache:
 
     def _filter_tasks(self, params):
         params = params.copy()
-        if 'before' in params:
-            params['before'] = datetime.datetime.utcfromtimestamp(
-                params['before'])
-        if 'after' in params:
-            params['after'] = datetime.datetime.utcfromtimestamp(
-                params['after'])
         filter_fields = self._missing_fields(
             self.cache.get('fields', None) or '',
             params.get('fields', None) or '')
@@ -232,10 +226,23 @@ class TaskCache:
             yield task
 
     def GetTasks(self, params):
+        filter_params = params.copy()
         comp = params.get('comp', None)
         if self.comp is not None and self.comp != params['comp']:
             raise ValueError(f"Can't specify comp={comp} to cache created "
                              f"with comp={self.comp}")
+        if 'before' in params:
+            if isinstance(params['before'], datetime.datetime):
+                params['before'] = params['before'].timestamp()
+            else:
+                filter_params['before'] = datetime.datetime.utcfromtimestamp(
+                    params['before'])
+        if 'after' in params:
+            if isinstance(params['after'], datetime.datetime):
+                params['after'] = params['after'].timestamp()
+            else:
+                filter_params['after'] = datetime.datetime.utcfromtimestamp(
+                    params['after'])
         if params.get('fields', None):
             self._check_fields(params['fields'])
             missing_fields = self._missing_fields(params['fields'])
@@ -243,7 +250,7 @@ class TaskCache:
                 raise ValueError(
                     f'Requested fields {missing_fields} are not in cache')
         self.update()
-        return list(self._filter_tasks(params))
+        return list(self._filter_tasks(filter_params))
 
     def GetDeletedTasks(self, after):
         # We don't cache this.
