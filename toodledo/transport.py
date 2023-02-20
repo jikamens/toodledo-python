@@ -177,8 +177,25 @@ class Toodledo:
         accountInfo.raise_for_status()
         return _AccountSchema().load(accountInfo.json())
 
-    def GetTasks(self, params):
-        """Get the tasks filtered by the given params"""
+    def GetTasks(self, params=None, before=None, after=None, comp=None,
+                 id_=None, fields=None):
+        """Get the tasks filtered by the given params.
+
+        You can params in the params array as for the raw API, or in the
+        `before`, `after`, `comp`, `id_`, and `fields` keywords arguments."""
+        if params is None:
+            params = {}
+        if before:
+            params['before'] = before
+        if after:
+            params['after'] = after
+        if comp is not None:
+            params['comp'] = comp
+        if id_:
+            params['id'] = id_
+        if fields:
+            params['fields'] = fields
+
         allTasks = []
         limit = 1000  # single request limit
         start = 0

@@ -7,9 +7,8 @@ from toodledo import DueDateModifier, Priority, Status, Task
 def CreateATask(toodledo, task, title=None):
     task.title = str(uuid4()) if title is None else title
     toodledo.AddTasks([task])
-    tasks = toodledo.GetTasks(
-            params={"fields": "startdate,duedate,tag,star,priority,duedatemod,"
-                    "status,length,note,repeat,parent"})
+    tasks = toodledo.GetTasks(fields="startdate,duedate,tag,star,priority,"
+                              "duedatemod,status,length,note,repeat,parent")
     assert isinstance(tasks, list)
     assert len(tasks) >= 1
 
@@ -74,12 +73,12 @@ def test_set_star(toodledo):
 
 def test_existing_star(toodledo):
     title = "Test task with star"
-    tasks = toodledo.GetTasks(params={"fields": "star"})
+    tasks = toodledo.GetTasks(fields="star")
     try:
         ourTask = next(t for t in tasks if t.title == title)
     except StopIteration:
         CreateATask(toodledo, Task(star=True), title=title)
-        tasks = toodledo.GetTasks(params={"fields": "star"})
+        tasks = toodledo.GetTasks(fields="star")
         ourTask = next(t for t in tasks if t.title == title)
 
     assert ourTask.star is True
@@ -140,7 +139,7 @@ def test_set_due_date_modifier(toodledo):
 def test_write_then_read(toodledo):
     randomTitle = str(uuid4())
     toodledo.AddTasks([Task(title=randomTitle)])
-    tasks = toodledo.GetTasks(params={})
+    tasks = toodledo.GetTasks()
     assert isinstance(tasks, list)
     assert len(tasks) >= 1
 
@@ -163,7 +162,7 @@ def test_write_then_read(toodledo):
     toodledo.DeleteTasks([task])
 
     # find our tasks again
-    tasks = toodledo.GetTasks(params={})
+    tasks = toodledo.GetTasks()
     ourTasks = [t for t in tasks if t.title == randomTitle]
     assert len(ourTasks) == 0
 
@@ -171,7 +170,7 @@ def test_write_then_read(toodledo):
 def test_extra_fields(toodledo):
     randomTitle = str(uuid4())
     toodledo.AddTasks([Task(title=randomTitle)])
-    tasks = toodledo.GetTasks(params={"fields": "tag,duedate,startdate"})
+    tasks = toodledo.GetTasks(fields="tag,duedate,startdate")
     assert isinstance(tasks, list)
     assert len(tasks) >= 1
 
@@ -194,6 +193,6 @@ def test_extra_fields(toodledo):
     toodledo.DeleteTasks([task])
 
     # find our tasks again
-    tasks = toodledo.GetTasks(params={})
+    tasks = toodledo.GetTasks()
     ourTasks = [t for t in tasks if t.title == randomTitle]
     assert len(ourTasks) == 0

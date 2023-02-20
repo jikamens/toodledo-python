@@ -8,7 +8,7 @@ def test_get_account(toodledo):
 
 
 def test_get_tasks(toodledo):
-    tasks = toodledo.GetTasks(params={})
+    tasks = toodledo.GetTasks()
     assert isinstance(tasks, list)
 
 
@@ -26,7 +26,7 @@ def test_get_tasks_with_known_folders(toodledo):
     while changed and attempts < 2:
         changed = False
         attempts += 1
-        tasks = toodledo.GetTasks(params={"fields": "folder"})
+        tasks = toodledo.GetTasks(fields="folder")
         for wanted in wanted_tasks:
             try:
                 wanted[0] = next(t for t in tasks if t.title == wanted[1])
@@ -53,7 +53,7 @@ def test_get_tasks_with_known_contexts(toodledo):
     while changed and attempts < 2:
         changed = False
         attempts += 1
-        tasks = toodledo.GetTasks(params={"fields": "context"})
+        tasks = toodledo.GetTasks(fields="context")
         for wanted in wanted_tasks:
             try:
                 wanted[0] = next(t for t in tasks if t.title == wanted[1])

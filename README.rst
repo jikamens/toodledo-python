@@ -64,9 +64,11 @@ And here's how you call the API:
                 
   account = toodledo.GetAccount()
 
-  allTasks = toodledo.GetTasks(params={})
+  allTasks = toodledo.GetTasks()
 
-See `this more extensive example
+See the help messages on individual methods.
+
+See also `this more extensive example
 <https://gist.github.com/jikamens/bad36fadfa73ee4f0ac1269ab3025f67>`_
 of using the API in a script.
 

@@ -296,10 +296,24 @@ class TaskCache:
                 setattr(task, field, getattr(task, field, None))
             yield task
 
-    def GetTasks(self, params):
+    def GetTasks(self, params=None,  # pylint: disable=too-many-branches
+                 before=None, after=None, comp=None, id_=None, fields=None):
+        """See Toodledo.GetTasks."""
+        if params is None:
+            params = {}
+        if before:
+            params['before'] = before
+        if after:
+            params['after'] = after
+        if comp is not None:
+            params['comp'] = comp
+        if id_:
+            params['id'] = id_
+        if fields:
+            params['fields'] = fields
         filter_params = params.copy()
         comp = params.get('comp', None)
-        if self.comp is not None and self.comp != params['comp']:
+        if self.comp is not None and self.comp != comp:
             raise ValueError(f"Can't specify comp={comp} to cache created "
                              f"with comp={self.comp}")
         if 'before' in params:
@@ -422,8 +436,7 @@ class TaskCache:
         # Handle rescheduled tasks
         if rescheduling:
             completed_tasks = self.toodledo.GetTasks(
-                {'comp': 1, 'fields': self.fields,
-                 'after': account.lastEditTask})
+                comp=1, fields=self.fields, after=account.lastEditTask)
             for t in completed_tasks:
                 cache_map[t.id_] = t
 

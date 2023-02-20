@@ -30,8 +30,7 @@ def test_cache_reschedule(cache):
         assert after_add_size == before_add_size
 
     created = [t
-               for t in cache.toodledo.GetTasks(
-                       params={'after': account.lastEditTask})
+               for t in cache.toodledo.GetTasks(after=account.lastEditTask)
                if t.title == new_task.title]
     cache.DeleteTasks(created)
     after_delete_size = len(cache)
