@@ -58,14 +58,15 @@ class TaskCache:
             self.load_from_path()
         else:
             self._new_cache()
-        if update:
-            self.update()
         if self.cache.get('version', None) is None:
             self.cache['version'] = 1
         if self.cache['version'] < 2:
             self.cache['comp'] = self.comp
             self.cache['fields'] = self.fields
             self.cache['version'] = 2
+        if self.cache['version'] < 3:
+            self.cache['newest_delete'] = self.cache['newest']
+            self.cache['version'] = 3
         if self.cache['comp'] != self.comp:
             if self.cache['comp'] is not None:
                 raise ValueError(
@@ -81,6 +82,8 @@ class TaskCache:
                     f"that weren't requested when cache was created")
             # Safe to downgrade fields
             self.cache['fields'] = self.fields
+        if update:
+            self.update()
 
     def _missing_fields(self, want_fields, cache_fields=None):
         if cache_fields is None:
@@ -127,7 +130,13 @@ class TaskCache:
         if cache['tasks']:
             cache['newest'] = max(t.modified for t in cache['tasks'])
         else:
-            cache['newest'] = datetime.datetime(1970, 1, 2)  # So we can -1 it
+            cache['newest'] = datetime.datetime(1970, 1, 2,  # So we can -1 it
+                                                tzinfo=datetime.timezone.utc)
+        cache['newest_delete'] = datetime.datetime(
+            1970, 1, 2, tzinfo=datetime.timezone.utc)
+        cache['comp'] = self.comp
+        cache['fields'] = self.fields
+        cache['version'] = 3
         self.cache = cache
         self.logger.debug('Initialized new (newest: %s)', cache['newest'])
         if self.autosave:
@@ -138,7 +147,7 @@ class TaskCache:
         # N.B. We fetch all tasks even if `comp` is set because otherwise we
         # won't know about tasks that have been completed or uncompleted.
         # - 1 to avoid race conditions
-        after = self.cache['newest'].timestamp() - 1
+        after = self.cache['newest_delete'].timestamp() - 1
         mapped = {t.id_: t for t in self}
         deleted_tasks = self.toodledo.GetDeletedTasks(after)
         delete_count = 0
@@ -147,14 +156,13 @@ class TaskCache:
                 del mapped[t.id_]
                 delete_count += 1
         if deleted_tasks:
-            newest = max(t.stamp for t in deleted_tasks)
-            new_newest = max(self.cache['newest'], newest)
-            self.logger.debug('newest from deleted newest=%s, newest from '
-                              'cache=%s, new newest=%s',
-                              newest, self.cache['newest'], new_newest)
-            self.cache['newest'] = new_newest
+            self.cache['newest_delete'] = max(t.stamp for t in deleted_tasks)
+
+            self.logger.debug('new newest delete=%s',
+                              self.cache['newest_delete'])
         self.logger.debug('Fetched %d deleted tasks, removed %d from cache',
                           deleted_tasks, delete_count)
+        after = self.cache['newest'].timestamp() - 1
         params = {'after': after}
         if self.fields:
             params['fields'] = self.fields
@@ -174,12 +182,8 @@ class TaskCache:
                 mapped[t.id_] = t
                 update_count += 1
         if updated_tasks:
-            newest = max(t.modified for t in updated_tasks)
-            new_newest = max(self.cache['newest'], newest)
-            self.logger.debug('newest from updated newest=%s, newest from '
-                              'cache=%s, new newest=%s',
-                              newest, self.cache['newest'], new_newest)
-            self.cache['newest'] = new_newest
+            self.cache['newest'] = max(t.modified for t in updated_tasks)
+            self.logger.debug('new newest=%s', self.cache['newest'])
             self.logger.debug('Fetched %d updated tasks, ignored %d because '
                               'comp=%d, updated %d in cache',
                               len(updated_tasks), comp_count, self.comp,
@@ -299,7 +303,10 @@ class TaskCache:
         return self.toodledo.EditContext(context)
 
     def GetAccount(self):
-        return self.toodledo.GetAccount()
+        account = self.toodledo.GetAccount()
+        account.lastEditTask = self.cache['newest']
+        account.latDeleteTask = self.cache['newest_delete']
+        return account
 
     def __getitem__(self, item):
         return self.cache['tasks'][item]

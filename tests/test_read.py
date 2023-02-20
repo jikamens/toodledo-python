@@ -1,8 +1,10 @@
 from toodledo import Task
+from toodledo.account import _Account
 
 
 def test_get_account(toodledo):
-    _ = toodledo.GetAccount()
+    account = toodledo.GetAccount()
+    assert isinstance(account, _Account)
 
 
 def test_get_tasks(toodledo):
