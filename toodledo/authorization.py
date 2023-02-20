@@ -11,10 +11,13 @@ def CommandLineAuthorization(clientId, clientSecret, scope, tokenStorage):
     print("Go to the following URL and authorize the app:" + authorizationUrl)
 
     try:
-        from pyperclip import copy  # pylint: disable=import-outside-toplevel
+        from pyclip import (  # pylint: disable=import-outside-toplevel
+            copy,
+            ClipboardSetupException
+        )
         copy(authorizationUrl)
         print("URL copied to clipboard")
-    except ImportError:
+    except (ImportError, ClipboardSetupException):
         pass
 
     redirectResponse = input("Paste the full redirect URL here: ")

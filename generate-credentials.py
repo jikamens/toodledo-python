@@ -23,13 +23,18 @@ def main():
                              "basic tasks notes folders write", tokenStorage)
 
     with suppress(ImportError):
-        from pyperclip import copy  # pylint: disable=import-outside-toplevel
+        from pyclip import (  # pylint: disable=import-outside-toplevel
+            copy,
+            ClipboardSetupException
+        )
         with open(os.environ["TOODLEDO_TOKEN_STORAGE"], encoding="ascii") as f:
             token = f.read()
         token = EscapeForBash(token)
-        copy(token)
-        print("Escaped token copied to clipboard - update Travis "
-              "TOODLEDO_TOKEN_READONLY environment variable")
+        try:
+            copy(token)
+            print("Escaped token copied to clipboard")
+        except ClipboardSetupException:
+            pass
 
 
 if __name__ == "__main__":

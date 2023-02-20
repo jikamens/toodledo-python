@@ -19,7 +19,7 @@ classifiers = [
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.7.2"
+python = ">=3.7.2,<4.0"
 marshmallow = "^3.18"
 requests-oauthlib = "^1.0"
 requests = "^2.20"
@@ -27,7 +27,7 @@ requests = "^2.20"
 [tool.poetry.dev-dependencies]
 pylint = "^2.16"
 pytest = "^7.2.1"
-pyperclip = "^1.7"
+pyclip = "^0.7"
 flake8 = "^4.0"
 
 [build-system]
