@@ -42,6 +42,7 @@ def toodledo(request):
                 session, cache_file.name, fields='folder,context,duedate,'
                 'duedatemod,length,note,parent,priority,repeat,star,startdate,'
                 'status,tag')
+            session._paranoid = True  # pylint: disable=protected-access
         yield session
 
 
@@ -62,4 +63,5 @@ def cache(request):
             session, cache_file.name, fields='folder,context,duedate,'
             'duedatemod,length,note,parent,priority,repeat,star,startdate,'
             'status,tag', comp=request.param)
+        session._paranoid = True  # pylint: disable=protected-access
         yield session

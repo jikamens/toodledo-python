@@ -4,6 +4,7 @@ import logging
 import os
 import pickle
 
+from toodledo.types import DueDateModifier, Priority, Status
 from toodledo.task import _TaskSchema, Task
 
 
@@ -70,6 +71,12 @@ class TaskCache:
         instantiations of the same cache, then newly fetched tasks will reflect
         the new values but previously cached tasks will not.
         """
+        # If this is true then every time GetTasks is called, before it returns
+        # its response it calls GetTasks on the server with the same parameters
+        # and confirms that what it gets back matches what was retrieved from
+        # the cache. This is used by the unit tests; it makes them run more
+        # slowly but does a good job of validating cache integrity.
+        self._paranoid = False
         self.logger = logging.getLogger(__name__)
         self.path = path
         self.autosave = autosave
@@ -334,7 +341,24 @@ class TaskCache:
             if missing_fields:
                 raise ValueError(
                     f'Requested fields {missing_fields} are not in cache')
-        return list(self._filter_tasks(filter_params))
+        from_cache = list(self._filter_tasks(filter_params))
+        if self._paranoid:
+            from_toodledo = self.toodledo.GetTasks(params)
+            from_cache.sort(key=lambda t: t.id_)
+            from_toodledo.sort(key=lambda t: t.id_)
+            assert len(from_cache) == len(from_toodledo)
+            for i, t in enumerate(from_cache):
+                t1 = t.__dict__.copy()
+                t2 = from_toodledo[i].__dict__.copy()
+                if t1.get('tags', None):
+                    t1['tags'].sort()
+                if t2.get('tags', None):
+                    t2['tags'].sort()
+                # Server is not always consistent
+                del t1['modified']
+                del t2['modified']
+                assert t1 == t2
+        return from_cache
 
     def GetDeletedTasks(self, after, update_cache=True):
         """Get tasks deleted after the specified timestamp.
@@ -360,9 +384,29 @@ class TaskCache:
         added_tasks = self.toodledo.AddTasks(tasks)
         # Copy so we can modify
         tasks = [Task(**task.__dict__) for task in tasks]
-        # Update from fields returned by server
+        split_fields = self.fields.split(',')
         for i, t in enumerate(tasks):
+            # Update from fields returned by server
             t.__dict__.update(added_tasks[i].__dict__)
+            # Default values
+            if 'duedatemod' in split_fields and \
+               getattr(t, 'dueDateModifier', None) is None:
+                t.dueDateModifier = DueDateModifier.DUE_BY
+            if 'length' in split_fields and getattr(t, 'length', None) is None:
+                t.length = 0
+            if 'note' in split_fields and getattr(t, 'note', None) is None:
+                t.note = ''
+            if 'priority' in split_fields and \
+               getattr(t, 'priority', None) is None:
+                t.priority = Priority.LOW
+            if 'repeat' in split_fields and getattr(t, 'repeat', None) is None:
+                t.repeat = ''
+            if 'star' in split_fields and getattr(t, 'star', None) is None:
+                t.star = False
+            if 'status' in split_fields and getattr(t, 'status', None) is None:
+                t.status = Status.NONE
+            if 'tag' in split_fields and getattr(t, 'tags', None) is None:
+                t.tags = []
         self.cache['tasks'].extend(
             t for t in tasks
             if self.comp is None or
