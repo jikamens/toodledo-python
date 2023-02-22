@@ -223,6 +223,10 @@ class Toodledo:
                 break
             start += limit
         schema = _TaskSchema()
+        for x in allTasks:
+            # This field is sometimes being leaked by the API and should be
+            # ignored.
+            x.pop('repeatfrom', None)
         return [schema.load(x) for x in allTasks]
 
     def GetDeletedTasks(self, after):
