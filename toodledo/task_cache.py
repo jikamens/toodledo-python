@@ -439,7 +439,7 @@ class TaskCache:
                 (getattr(t, 'repeat', None) or
                  getattr(t, 'repeat', 'missing') == 'missing') and
                 t.id_ in cache_map and
-                getattr(cache_map[t.id_], 'repeat') and
+                getattr(cache_map[t.id_], 'repeat', None) and
                 not getattr(cache_map[t.id_], 'completedDate', None))
         if rescheduling:
             # So we can use lastEditTask to fetch auto-created completed
