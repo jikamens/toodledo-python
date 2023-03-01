@@ -52,7 +52,7 @@ class TaskCache:
     fields_map = {f.data_key or k: k for k, f in schema.fields.items()}
 
     def __init__(self, toodledo, path,  # pylint: disable=too-many-branches
-                 update=True, autosave=True, comp=None, fields=''):
+                 update=True, autosave=True, comp=None, fields='', clear=False):
         """Initialize a new TaskCache object.
 
         Required arguments:
@@ -66,6 +66,7 @@ class TaskCache:
                 tasks
         fields -- (string) optional fields to fetch and cache as per API
                   documentation
+        clear -- clear the cache and reload from server (default: False)
 
         If you change the values of the keyword arguments between
         instantiations of the same cache, then newly fetched tasks will reflect
@@ -89,7 +90,7 @@ class TaskCache:
         self.fields = fields
         if self.fields:
             self._check_fields(self.fields)
-        if not os.path.exists(path):
+        if clear or not os.path.exists(path):
             self._new_cache()
             return
         self.load_from_path()
