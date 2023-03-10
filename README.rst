@@ -8,6 +8,9 @@ https://pypi.org/project/toodledo/.
 This fork is being actively maintained by Jonathan Kamens
 <jik@kamens.us>. Thanks to Rehan Khwaja for creating this library.
 
+Please `support this project on Patreon
+<https://www.patreon.com/jikseclecticofferings>`_.
+
 Usage
 =====
 
