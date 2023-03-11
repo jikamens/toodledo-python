@@ -424,8 +424,7 @@ class TaskCache:
         # The most complicated logic in this function is that we have to handle
         # tasks that are rescheduled by the server. That means:
         # * Detect when task are going to be rescheduled by the server because
-        #   they're completedDate is being modified and reschedule=1 is set in
-        #   them.
+        #   their completedDate is being set and reschedule=1 is set in them.
         # * Remove the reschedule=1 flag from edited tasks before putting them
         #   in the cache or returning them to the user.
         # * For tasks that were rescheduled, if comp is None or 1 then we need
