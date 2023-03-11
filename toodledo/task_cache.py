@@ -481,7 +481,8 @@ class TaskCache:
         # Handle rescheduled tasks
         if rescheduling:
             completed_tasks = self.toodledo.GetTasks(
-                comp=1, fields=self.fields, after=account.lastEditTask)
+                comp=1, fields=self.fields,
+                after=account.lastEditTask.timestamp() - 1)
             for t in completed_tasks:
                 cache_map[t.id_] = t
 
