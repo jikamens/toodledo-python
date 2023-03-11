@@ -539,3 +539,13 @@ class TaskCache:
     def __repr__(self):
         return (f'<TaskCache ({len(self.cache["tasks"])} items, '
                 f'newest {str(self.cache["newest"])})>')
+
+    # pylint: disable=protected-access
+
+    @property
+    def _session(self):
+        return self.toodledo._session
+
+    @property
+    def _history(self):
+        return self.toodledo._history
