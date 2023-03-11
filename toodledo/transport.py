@@ -67,13 +67,16 @@ class Toodledo:
         self.clientId = clientId
         self.clientSecret = clientSecret
         self.scope = scope
+        self.session = None
 
     def _Session(self):
+        if self.session:
+            return self.session
         token = self.tokenStorage.Load()
         if token is None:
             raise AuthorizationNeeded("No token in storage")
 
-        return ToodledoSession(
+        self.session = ToodledoSession(
             client_id=self.clientId,
             token=token,
             auto_refresh_kwargs={
@@ -82,6 +85,7 @@ class Toodledo:
             },
             auto_refresh_url=Toodledo.tokenUrl,
             token_updater=self.tokenStorage.Save)
+        return self.session
 
     def GetFolders(self):
         """Get all the folders as folder objects"""
