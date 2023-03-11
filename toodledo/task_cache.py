@@ -52,7 +52,8 @@ class TaskCache:
     fields_map = {f.data_key or k: k for k, f in schema.fields.items()}
 
     def __init__(self, toodledo, path,  # pylint: disable=too-many-branches
-                 update=True, autosave=True, comp=None, fields='', clear=False):
+                 update=True, autosave=True, comp=None, fields='',
+                 clear=False):
         """Initialize a new TaskCache object.
 
         Required arguments:
