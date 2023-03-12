@@ -282,7 +282,7 @@ class TaskCache:
         for task in self:
             if 'id' in params:
                 if task.id_ == params['id']:
-                    yield [task]
+                    yield task
                     return
                 continue
             if params.get('comp', None) == 0 and task.completedDate:
@@ -305,8 +305,9 @@ class TaskCache:
                 setattr(task, field, getattr(task, field, None))
             yield task
 
-    def GetTasks(self, params=None,  # pylint: disable=too-many-branches
-                 before=None, after=None, comp=None, id_=None, fields=None):
+    # pylint: disable=too-many-branches,too-many-locals,too-many-statements
+    def GetTasks(self, params=None, before=None, after=None, comp=None,
+                 id_=None, fields=None):
         """See Toodledo.GetTasks."""
         if params is None:
             params = {}
@@ -359,8 +360,14 @@ class TaskCache:
                 # Server is not always consistent
                 del t1['modified']
                 del t2['modified']
-                assert t1 == t2
+                check_fields = set(('id', 'title', 'completed'))
+                if params.get('fields', None):
+                    check_fields.update(params['fields'].split(','))
+                check_fields = [self.fields_map[f] for f in check_fields]
+                for field in check_fields:
+                    assert t1[field] == t2[field]
         return from_cache
+    # pylint: enable=too-many-branches,too-many-locals,too-many-statements
 
     def GetDeletedTasks(self, after, update_cache=True):
         """Get tasks deleted after the specified timestamp.
@@ -416,7 +423,7 @@ class TaskCache:
             self.comp == 1 and getattr(t, 'completedDate', None))
         return added_tasks
 
-    def EditTasks(self, tasks):
+    def EditTasks(self, tasks):  # pylint: disable=too-many-branches
         """Edit the specified tasks and update the cache to reflect them.
 
         See Toodledo.EditTasks for more information."""
@@ -470,13 +477,19 @@ class TaskCache:
                 (complete if getattr(t, 'completedDate', None)
                  else incomplete).append(t)
             wanted = incomplete if self.comp == 0 else complete
-            unwanted = complete if self.comp == 1 else incomplete
+            unwanted = incomplete if self.comp == 1 else complete
         # Remove unwanted tasks
         for t in unwanted:
             cache_map.pop(t.id_, None)
         # Update wanted tasks
         for t in wanted:
-            cache_map[t.id_] = t
+            if t.id_ in cache_map:
+                cache_map[t.id_].__dict__.update(t.__dict__)
+            else:
+                # The task wasn't in the cache before because it transitioned
+                # from complete to incomplete or vice versa asnd the cache is
+                # only storing the other type.
+                cache_map[t.id_] = t
 
         # Handle rescheduled tasks
         if rescheduling:
