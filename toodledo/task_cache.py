@@ -366,7 +366,7 @@ class TaskCache:
                 check_fields = [self.fields_map[f] for f in check_fields]
                 for field in check_fields:
                     assert t1[field] == t2[field]
-        return from_cache
+        return [Task(**t.__dict__) for t in from_cache]
     # pylint: enable=too-many-branches,too-many-locals,too-many-statements
 
     def GetDeletedTasks(self, after, update_cache=True):
@@ -421,7 +421,7 @@ class TaskCache:
             if self.comp is None or
             self.comp == 0 and not getattr(t, 'completedDate', None) or
             self.comp == 1 and getattr(t, 'completedDate', None))
-        return added_tasks
+        return [Task(**t.__dict__) for t in added_tasks]
 
     def EditTasks(self, tasks):  # pylint: disable=too-many-branches
         """Edit the specified tasks and update the cache to reflect them.
@@ -501,7 +501,7 @@ class TaskCache:
 
         self.cache['tasks'] = list(cache_map.values())
 
-        return edited_tasks
+        return [Task(**t.__dict__) for t in edited_tasks]
 
     def DeleteTasks(self, tasks):
         """Delete the specified tasks and update the cache to reflect them."""
@@ -544,7 +544,7 @@ class TaskCache:
         return account
 
     def __getitem__(self, item):
-        return self.cache['tasks'][item]
+        return Task(**self.cache['tasks'][item].__dict__)
 
     def __len__(self):
         return len(self.cache['tasks'])
