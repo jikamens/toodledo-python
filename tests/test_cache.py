@@ -16,20 +16,25 @@ def test_cache_reschedule(cache):
         id_=new_task.id_,
         completedDate=datetime.date.today(),
         reschedule=1)])[0]
-    after_add_size = len(cache)
     assert edited_task.completedDate is None
     assert edited_task.id_ == new_task.id_
     assert edited_task.title == new_task.title
+    tasks = [t for t in cache.GetTasks(comp=comp, fields='duedate')
+             if t.title == new_task.title]
+    # Assumes ids go in in increasing order by when they're created
+    tasks.sort(key=lambda t: t.id_)
+    tomorrow = datetime.date.today() + datetime.timedelta(days=1)
     if comp is None:
-        assert after_add_size == before_add_size + 2
+        assert len(tasks) == 2
+        assert tasks[0].id_ == new_task.id_
+        assert tasks[0].dueDate == tomorrow
     elif comp == 0:
-        assert after_add_size == before_add_size + 1
+        assert len(tasks) == 1
+        assert tasks[0].id_ == new_task.id_
+        assert tasks[0].dueDate == tomorrow
     elif comp == 1:
-        # Because the cache only has completed tasks in it, the task we
-        # initially added above wasn't saved in the cache after it was added,
-        # which means that the newly created completed task also wasn't saved
-        # in the cache after the edit, which is expected behavior.
-        assert after_add_size == before_add_size
+        assert len(tasks) == 1
+        assert tasks[0].id_ != new_task.id_
 
     created = [t
                for t in cache.toodledo.GetTasks(after=account.lastEditTask)

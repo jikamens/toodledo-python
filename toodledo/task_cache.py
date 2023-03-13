@@ -434,20 +434,15 @@ class TaskCache:
         #   their completedDate is being set and reschedule=1 is set in them.
         # * Remove the reschedule=1 flag from edited tasks before putting them
         #   in the cache or returning them to the user.
-        # * For tasks that were rescheduled, if comp is None or 1 then we need
-        #   to find the newly completed tasks created automatically by the
-        #   server and add them to the cache.
+        # * For tasks that were rescheduled, and possibly also for the newly
+        #   created tasks from the rescheduling, we need to update/add them to
+        #   the cache.
         #
         cache_map = {t.id_: t for t in self.cache['tasks']}
-        rescheduling = (self.comp is None or self.comp == 1) and \
-            any(True for t in tasks
-                if getattr(t, 'reschedule', False) and
-                getattr(t, 'completedDate', None) and
-                (getattr(t, 'repeat', None) or
-                 getattr(t, 'repeat', 'missing') == 'missing') and
-                t.id_ in cache_map and
-                getattr(cache_map[t.id_], 'repeat', None) and
-                not getattr(cache_map[t.id_], 'completedDate', None))
+        rescheduling = [
+            t for t in tasks
+            if getattr(t, 'reschedule', False) and
+            getattr(t, 'completedDate', None)]
         if rescheduling:
             # So we can use lastEditTask to fetch auto-created completed
             # clones of rescheduled tasks.
@@ -491,13 +486,23 @@ class TaskCache:
                 # only storing the other type.
                 cache_map[t.id_] = t
 
-        # Handle rescheduled tasks
         if rescheduling:
-            completed_tasks = self.toodledo.GetTasks(
-                comp=1, fields=self.fields,
-                after=account.lastEditTask.timestamp() - 1)
-            for t in completed_tasks:
-                cache_map[t.id_] = t
+            # Add to the cache any modified tasks whose ids (complete) or
+            # titles (incomplete) match the ones being rescheduled.
+            ids = set(t.id_ for t in rescheduling)
+            titles = set()
+            new_tasks = self.toodledo.GetTasks(
+                fields=self.fields, after=account.lastEditTask.timestamp() - 1)
+            # Assumes ids go in in increasing order by when they're created
+            new_tasks.sort(key=lambda t: t.id_)
+            for t in new_tasks:
+                if t.id_ in ids:
+                    titles.add(t.title)
+                if t.id_ in ids or t.title in titles:
+                    if ((self.comp is None or
+                         (not t.completedDate and self.comp == 0) or
+                         (t.completedDate and self.comp == 1))):
+                        cache_map[t.id_] = t
 
         self.cache['tasks'] = list(cache_map.values())
 
