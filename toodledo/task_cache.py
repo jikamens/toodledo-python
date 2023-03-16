@@ -416,6 +416,13 @@ class TaskCache:
                 t.status = Status.NONE
             if 'tag' in split_fields and getattr(t, 'tags', None) is None:
                 t.tags = []
+            # The date in the dueTime field should always match the date in
+            # dueDate.
+            if getattr(t, 'dueDate', None) and \
+               getattr(t, 'dueTime', None) and \
+               t.dueDate != t.dueTime.date():
+                t.dueTime = datetime.datetime.combine(
+                    t.dueDate, t.dueTime.timetz())
         self.cache['tasks'].extend(
             t for t in tasks
             if self.comp is None or
@@ -476,6 +483,14 @@ class TaskCache:
         # Remove unwanted tasks
         for t in unwanted:
             cache_map.pop(t.id_, None)
+
+        # Fix broken dueTimes
+        if getattr(t, 'dueDate', None) and \
+           getattr(t, 'dueTime', None) and \
+           t.dueDate != t.dueTime.date():
+            t.dueTime = datetime.datetime.combine(
+                t.dueDate, t.dueTime.timetz())
+
         # Update wanted tasks
         for t in wanted:
             if t.id_ in cache_map:
