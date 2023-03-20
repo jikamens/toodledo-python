@@ -14,7 +14,7 @@ publish:
 clean: ; -rm -rf dist
 
 test-secrets.sh:
-	@echo "Please create test-secrets-sh from test-secrets.sh.template" 1>&2
+	@echo "Please create test-secrets.sh from test-secrets.sh.template" 1>&2
 	@false
 
 test-token.json: test-secrets.sh
