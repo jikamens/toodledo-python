@@ -2,6 +2,7 @@
 
 from contextlib import contextmanager
 import datetime
+from itertools import islice
 from json import dumps
 import logging
 
@@ -279,15 +280,16 @@ class Toodledo:
         Only specify fields that need to be changed, except for the id_ field,
         which must always be specified. In particular, note that if you specify
         `None` for a field, that means to erase it, not to ignore it!"""
-        if len(taskList) == 0:
-            return []
-        self.logger.debug("Total tasks to edit: %d", len(taskList))
+        # Any iterator can be passed in, not just a list.
+        # The iterator we create here remembers our place in the input as we
+        # step through it in chunks using islice.
+        taskList = iter(taskList)
         limit = 50  # single request limit
-        start = 0
         responses = []
         while True:
-            self.logger.debug("Start: %d", start)
-            listDump = _DumpTaskList(taskList[start:start + limit])
+            listDump = _DumpTaskList(list(islice(taskList, limit)))
+            if not listDump:
+                break
             response = self._session.post(
                 Toodledo.editTasksUrl, data={"tasks": dumps(listDump)})
             response.raise_for_status()
@@ -307,22 +309,18 @@ class Toodledo:
                 raise Exception(str(errors))
                 # pylint: enable=broad-exception-raised
             responses.extend(taskResponse)
-            if len(taskList[start:start + limit]) < limit:
-                break
-            start += limit
         schema = _TaskSchema()
         return [schema.load(t) for t in responses]
 
     def AddTasks(self, taskList):
         """Add the given tasks"""
-        if len(taskList) == 0:
-            return []
+        taskList = iter(taskList)  # See EditTasks
         limit = 50  # single request limit
-        start = 0
         responses = []
         while True:
-            self.logger.debug("Start: %d", start)
-            listDump = _DumpTaskList(taskList[start:start + limit])
+            listDump = _DumpTaskList(list(islice(taskList, limit)))
+            if not listDump:
+                break
             response = self._session.post(
                 Toodledo.addTasksUrl, data={"tasks": dumps(listDump)})
             response.raise_for_status()
@@ -341,9 +339,6 @@ class Toodledo:
                 raise Exception(str(errors))
                 # pylint: enable=broad-exception-raised
             responses.extend(taskResponse)
-            if len(taskList[start:start + limit]) < limit:
-                break
-            start += limit
         schema = _TaskSchema()
         return [schema.load(t) for t in responses]
 
