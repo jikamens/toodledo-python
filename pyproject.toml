@@ -18,6 +18,9 @@ classifiers = [
 	"Programming Language :: Python :: 3.11"
 ]
 
+[tool.poetry.urls]
+changelog = "https://github.com/jikamens/toodledo-python/releases"
+
 [tool.poetry.dependencies]
 python = ">=3.7.2,<4.0"
 marshmallow = "^3.18"

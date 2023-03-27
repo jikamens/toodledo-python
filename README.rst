@@ -6,7 +6,10 @@ http://api.toodledo.com/3/. Available on PyPI at
 https://pypi.org/project/toodledo/.
 
 This fork is being actively maintained by Jonathan Kamens
-<jik@kamens.us>. Thanks to Rehan Khwaja for creating this library.
+<jik@kamens.us>. Changelogs of new releases are `published on Github
+<https://github.com/jikamens/toodledo-python/releases>`_.
+
+Thanks to Rehan Khwaja for creating this library.
 
 Please `support this project on Patreon
 <https://www.patreon.com/jikseclecticofferings>`_.
