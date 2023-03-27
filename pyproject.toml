@@ -20,6 +20,7 @@ classifiers = [
 
 [tool.poetry.urls]
 changelog = "https://github.com/jikamens/toodledo-python/releases"
+donate = "https://www.patreon.com/jikseclecticofferings"
 
 [tool.poetry.dependencies]
 python = ">=3.7.2,<4.0"
