@@ -484,15 +484,15 @@ class TaskCache:
         for t in unwanted:
             cache_map.pop(t.id_, None)
 
-        # Fix broken dueTimes
-        if getattr(t, 'dueDate', None) and \
-           getattr(t, 'dueTime', None) and \
-           t.dueDate != t.dueTime.date():
-            t.dueTime = datetime.datetime.combine(
-                t.dueDate, t.dueTime.timetz())
-
         # Update wanted tasks
         for t in wanted:
+            # Fix broken dueTimes
+            if getattr(t, 'dueDate', None) and \
+               getattr(t, 'dueTime', None) and \
+               t.dueDate != t.dueTime.date():
+                t.dueTime = datetime.datetime.combine(
+                    t.dueDate, t.dueTime.timetz())
+
             if t.id_ in cache_map:
                 cache_map[t.id_].__dict__.update(t.__dict__)
             else:
