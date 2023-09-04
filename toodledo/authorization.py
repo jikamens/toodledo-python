@@ -15,10 +15,14 @@ def CommandLineAuthorization(clientId, clientSecret, scope, tokenStorage):
             copy,
             ClipboardSetupException
         )
-        copy(authorizationUrl)
-        print("URL copied to clipboard")
-    except (ImportError, ClipboardSetupException):
+    except ImportError:
         pass
+    else:
+        try:
+            copy(authorizationUrl)
+            print("URL copied to clipboard")
+        except ClipboardSetupException:
+            pass
 
     redirectResponse = input("Paste the full redirect URL here: ")
 
