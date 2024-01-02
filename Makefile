@@ -8,6 +8,8 @@ lint: check-secrets
 test: check-secrets test-secrets.sh test-token.json
 	. ./test-secrets.sh; poetry run pytest $(PYTEST_ARGS)
 
+# N.B. Before you do this you need to do
+# `poetry config pypi.token.pypi <token>`
 publish:
 	poetry publish
 
