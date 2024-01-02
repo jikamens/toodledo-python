@@ -149,3 +149,23 @@ class _ToodledoInteger(fields.Integer):
         if value == 0:
             return None
         return value
+
+
+class _ToodledoRemind(fields.Integer):
+    def remind_check(self, value):
+        # Up for debate here: do we enforce the valid values that the API
+        # documentation specifies or just make sure it's an integer >= 0?
+        # For now I'm opting just for the latter, since the API transparently
+        # handles invalid values itself.
+        # assert value in (0, 1, 15, 30, 45, 60, 90, 120, 180, 240, 1440, 2880,
+        #                  4320, 5760, 7200, 8640, 10080, 20160, 43200)
+        assert isinstance(value, int)
+        assert value >= 0
+
+    def _serialize(self, value, attr, obj, **kwargs):
+        self.remind_check(value)
+        return super()._serialize(value, attr, obj)
+
+    def _deserialize(self, value, attr, data, partial=True, **kwargs):
+        self.remind_check(value)
+        return value

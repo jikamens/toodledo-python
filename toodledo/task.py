@@ -14,6 +14,7 @@ from .custom_fields import (
     _ToodledoStatus,
     _ToodledoTags,
     _ToodledoInteger,
+    _ToodledoRemind,
 )
 
 
@@ -55,6 +56,7 @@ class _TaskSchema(Schema):
     folderId = _ToodledoListId(data_key="folder")
     contextId = _ToodledoListId(data_key="context")
     meta = fields.String(allow_none=True)
+    remind = _ToodledoRemind()
     reschedule = fields.Integer()
 
     @post_load
