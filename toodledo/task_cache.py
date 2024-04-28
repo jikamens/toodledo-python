@@ -22,7 +22,7 @@ class TaskCache:
     This function has all the same methods as the `Toodledo` session class, so
     you can use it as a drop-in replacement. And vice versa... The session
     class has a bunch of no-op functions (e.g., `save()`, `update()` so code
-    written to use the cache will work fine using the session cache directory,
+    written to use the cache will work fine using the session cache directly,
     just a bit slower.
 
     The cache updates automatically when you instantiate it unless you specify
