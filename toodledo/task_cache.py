@@ -163,7 +163,7 @@ class TaskCache:
         Keyword arguments:
         path -- path to use instead of the one specified on initialziation
         """
-        path = path or self.path
+        path = os.path.realpath(path or self.path)
         with open(path, 'wb') as f:
             pickle.dump(self.cache, f)
         self.logger.debug('Dumped to %s', path)
