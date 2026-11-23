@@ -1,5 +1,8 @@
+Toodledo API wrapper for Python
+===============================
+
 Overview
-========
+--------
 
 Python wrapper for the Toodledo v3 API which is documented at
 http://api.toodledo.com/3/. Available on PyPI at
@@ -15,7 +18,7 @@ Please `support this project on Patreon
 <https://www.patreon.com/jikseclecticofferings>`_.
 
 Usage
-=====
+-----
 
 If you're using this library to build a web app that will be used by
 multiple people, you need to be familiar with how to use OAuth2 for
@@ -88,7 +91,7 @@ things change in Toodledo. Import the class and look at its help
 string for more information.
 
 Developing the library
-======================
+----------------------
 
 The library uses ``poetry`` for managing packages, building, and
 publishing. You can do ``poetry install`` at the top level of the
@@ -124,3 +127,10 @@ Then run the tests by executing
 in the root directory.
 
 Please ensure that all the tests pass in any PRs you submit.
+
+Generative AI policy
+--------------------
+
+This project does not solicit or accept work produced with substantive
+assistance from generative AI. Only `hand-crafted code
+<https://handcraftedcode.org>`_ is welcome here.
